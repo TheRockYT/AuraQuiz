@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.widthIn
@@ -68,21 +70,35 @@ fun QuizScreen(
     }
 
     val backgroundColor = appearance.backgroundColor ?: MaterialTheme.colorScheme.background
+    val scrollState = rememberScrollState()
+    val swipeToDismissEnabled = onDismiss != null
 
     CompositionLocalProvider(LocalQuizAppearance provides appearance) {
-        Surface(
-            modifier = modifier.fillMaxSize(),
-            color = backgroundColor
-        ) {
+        val quizContent: @Composable () -> Unit = {
             BoxWithConstraints(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .then(
+                        if (swipeToDismissEnabled) {
+                            Modifier.wrapContentHeight()
+                        } else {
+                            Modifier.fillMaxSize()
+                        }
+                    ),
                 contentAlignment = Alignment.TopCenter
             ) {
                 Column(
                     modifier = Modifier
                         .widthIn(max = contentMaxWidth)
                         .fillMaxWidth()
-                        .verticalScroll(rememberScrollState())
+                        .then(
+                            if (swipeToDismissEnabled) {
+                                Modifier.heightIn(max = maxHeight)
+                            } else {
+                                Modifier.fillMaxSize()
+                            }
+                        )
+                        .verticalScroll(scrollState)
                         .padding(WindowInsets.safeDrawing.asPaddingValues())
                         .padding(
                             horizontal = appearance.horizontalPadding,
@@ -90,60 +106,82 @@ fun QuizScreen(
                         ),
                     verticalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
-                    QuizQuestionCard(question = question)
+                        QuizQuestionCard(question = question)
 
-                    QuizFeedbackBanner(
-                        isSolved = isSolved,
-                        hasWrongAttempt = wrongAnswers.isNotEmpty() && !isSolved
-                    )
+                        QuizFeedbackBanner(
+                            isSolved = isSolved,
+                            hasWrongAttempt = wrongAnswers.isNotEmpty() && !isSolved
+                        )
 
-                    QuizAnswerList(
-                        choices = choices,
-                        correctAnswer = question.correctAnswer,
-                        wrongAnswers = wrongAnswers,
-                        isSolved = isSolved,
-                        onAnswerSelected = { selected ->
-                            if (isSolved || selected in wrongAnswers) return@QuizAnswerList
+                        QuizAnswerList(
+                            choices = choices,
+                            correctAnswer = question.correctAnswer,
+                            wrongAnswers = wrongAnswers,
+                            isSolved = isSolved,
+                            onAnswerSelected = { selected ->
+                                if (isSolved || selected in wrongAnswers) return@QuizAnswerList
 
-                            if (selected == question.correctAnswer) {
-                                isSolved = true
-                                onCorrectAnswer?.invoke()
-                            } else {
-                                wrongAnswers = wrongAnswers + selected
+                                if (selected == question.correctAnswer) {
+                                    isSolved = true
+                                    onCorrectAnswer?.invoke()
+                                } else {
+                                    wrongAnswers = wrongAnswers + selected
+                                }
+                            }
+                        )
+
+                        if (showContinueButton && isSolved && onContinue != null && !autoAdvanceOnCorrect) {
+                            Button(
+                                onClick = onContinue,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text("Next Question")
                             }
                         }
-                    )
 
-                    if (showContinueButton && isSolved && onContinue != null && !autoAdvanceOnCorrect) {
-                        Button(
-                            onClick = onContinue,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text("Next Question")
-                        }
-                    }
-
-                    if (onDismiss != null) {
-                        OutlinedButton(
-                            onClick = onDismiss,
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = if (appearance.useGlassStyle) {
-                                ButtonDefaults.outlinedButtonColors(
-                                    contentColor = appearance.contentColor
-                                )
-                            } else {
-                                ButtonDefaults.outlinedButtonColors()
-                            },
-                            border = if (appearance.useGlassStyle) {
-                                BorderStroke(1.dp, appearance.answerBorderColor)
-                            } else {
-                                ButtonDefaults.outlinedButtonBorder
+                        if (onDismiss != null) {
+                            OutlinedButton(
+                                onClick = onDismiss,
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = if (appearance.useGlassStyle) {
+                                    ButtonDefaults.outlinedButtonColors(
+                                        contentColor = appearance.contentColor
+                                    )
+                                } else {
+                                    ButtonDefaults.outlinedButtonColors()
+                                },
+                                border = if (appearance.useGlassStyle) {
+                                    BorderStroke(1.dp, appearance.answerBorderColor)
+                                } else {
+                                    ButtonDefaults.outlinedButtonBorder
+                                }
+                            ) {
+                                Text(dismissButtonLabel)
                             }
-                        ) {
-                            Text(dismissButtonLabel)
                         }
-                    }
                 }
+            }
+        }
+
+        if (swipeToDismissEnabled) {
+            SwipeToDismissContainer(
+                onDismiss = onDismiss,
+                modifier = modifier.fillMaxSize(),
+                enabled = true,
+                backgroundTapToDismiss = true,
+                scrimColor = Color(0x66000000),
+                content = quizContent
+            )
+        } else {
+            Surface(
+                modifier = modifier.fillMaxSize(),
+                color = backgroundColor
+            ) {
+                SwipeToDismissContainer(
+                    onDismiss = { onDismiss?.invoke() },
+                    enabled = false,
+                    content = quizContent
+                )
             }
         }
     }
