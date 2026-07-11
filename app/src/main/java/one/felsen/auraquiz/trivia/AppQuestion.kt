@@ -15,7 +15,10 @@ data class AppQuestion(
     val question: String,
     val correctAnswer: String,
     val incorrectAnswers: List<String>
-)
+) {
+    fun shuffledChoices(): List<String> =
+        (incorrectAnswers + correctAnswer).shuffled()
+}
 
 
 
