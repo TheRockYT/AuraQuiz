@@ -1,4 +1,4 @@
-package one.felsen.auraquiz
+package one.felsen.auraquiz.lock
 
 import android.content.BroadcastReceiver
 import android.content.Context

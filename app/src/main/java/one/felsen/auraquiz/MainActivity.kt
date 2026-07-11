@@ -1,7 +1,6 @@
 package one.felsen.auraquiz
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
@@ -15,13 +14,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import one.felsen.auraquiz.ui.theme.AuraQuizTheme
 import androidx.core.net.toUri
+import one.felsen.auraquiz.lock.LockScreenPrefs
+import one.felsen.auraquiz.lock.LockScreenService
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

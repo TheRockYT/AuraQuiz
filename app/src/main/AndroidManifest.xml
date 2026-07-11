@@ -28,19 +28,19 @@
 
 
         <activity
-            android:name=".LockScreenActivity"
+            android:name=".lock.LockScreenActivity"
             android:theme="@style/Theme.TransparentLockScreen"
             android:exported="false"
             android:launchMode="singleInstance"
             android:excludeFromRecents="true" />
 
         <service
-            android:name=".LockScreenService"
+            android:name=".lock.LockScreenService"
             android:exported="false"
             android:foregroundServiceType="specialUse" />
 
         <receiver
-            android:name=".BootReceiver"
+            android:name=".lock.BootReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
