@@ -19,9 +19,8 @@ fun <T> SettingSingleChoiceRow(
 
     SettingCategoryRow(
         title = title,
-        description = if (description != null) "$description\n" else "" + if (selected != null) labelFor(
-            selected
-        ) else "",
+        description = (if (description != null) "$description\n" else "") +
+                (if (selected != null) labelFor(selected) else ""),
         onClick = { showDialog = true }
     )
 
