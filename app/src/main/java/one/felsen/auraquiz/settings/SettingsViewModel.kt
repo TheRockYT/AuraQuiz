@@ -6,6 +6,19 @@ import kotlinx.coroutines.launch
 import one.felsen.auraquiz.lock.ProcessManager
 
 class SettingsViewModel(private val repo: SettingsRepository) : ViewModel() {
+
+    val maxNew = repo.getMaxNew()
+
+    fun setMaxNew(maxNew: Int) {
+        viewModelScope.launch { repo.setMaxNew(maxNew) }
+    }
+
+    val fastSkip = repo.getFastSkip()
+
+    fun setFastSkip(fastSkip: FastSkip) {
+        viewModelScope.launch { repo.setFastSkip(fastSkip) }
+    }
+
     val appTheme = repo.getAppTheme()
 
     fun setAppTheme(appTheme: AppTheme) {

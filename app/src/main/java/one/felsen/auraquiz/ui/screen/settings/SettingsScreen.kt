@@ -7,13 +7,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import one.felsen.auraquiz.lock.ProcessManager
 import one.felsen.auraquiz.settings.AppTheme
 import one.felsen.auraquiz.settings.SettingsViewModel
 import one.felsen.auraquiz.ui.screen.Screen
 import one.felsen.auraquiz.ui.screen.SettingsDecks
+import one.felsen.auraquiz.ui.screen.SettingsSchedulerScreen
 import one.felsen.auraquiz.ui.screen.SettingsSynchronization
 import one.felsen.auraquiz.ui.screen.settings.components.AboutBottomSheet
 import one.felsen.auraquiz.ui.screen.settings.components.SettingCategoryRow
@@ -29,15 +28,13 @@ fun SettingsScreen(
     onCategorySelect: (Screen) -> Unit
 ) {
 
-    val context = LocalContext.current.applicationContext
-
     var showAboutSheet by remember { mutableStateOf(false) }
 
     SettingsPlane(title = "Settings", onBack = onBack) {
         SettingCategoryTitle("Content")
         SettingCategoryRow(
             title = "Decks",
-            description = "Active decks: -",
+            description = "Setup the decks",
             onClick = { onCategorySelect(SettingsDecks) }
         )
         SettingCategoryRow(
@@ -45,6 +42,14 @@ fun SettingsScreen(
             description = "Unavailable",
             onClick = { onCategorySelect(SettingsSynchronization) }
         )
+
+        SettingCategoryRow(
+            title = "Scheduler",
+            description = "Setup how the scheduler works",
+            onClick = { onCategorySelect(SettingsSchedulerScreen) }
+        )
+
+
         HorizontalDivider()
 
         SettingCategoryTitle("General")
@@ -56,7 +61,7 @@ fun SettingsScreen(
             options = AppTheme.entries,
             selected = appTheme,
             labelFor = { it.label },
-            onSelect = { settingsViewModel.setAppTheme(it) },
+            onSelect = { settingsViewModel.setAppTheme(it) }
         )
 
         val isOnLockscreen by settingsViewModel.isOnLockScreen.collectAsStateWithLifecycle(false)

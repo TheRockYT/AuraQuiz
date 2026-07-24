@@ -13,6 +13,21 @@ private val Context.dataStore by preferencesDataStore(name = "settings")
 
 class SettingsRepository(val context: Context) {
 
+    fun getMaxNew(): Flow<Int> {
+        return getFlow(SettingsKeys.MAX_NEW, 30)
+    }
+
+    suspend fun setMaxNew(maxNew: Int) {
+        set(SettingsKeys.MAX_NEW, maxNew)
+    }
+
+    fun getFastSkip(): Flow<FastSkip> {
+        return getEnumFlow(SettingsKeys.FAST_SKIP, FastSkip.DISABLED)
+    }
+
+    suspend fun setFastSkip(fastSkip: FastSkip) {
+        setEnum(SettingsKeys.FAST_SKIP, fastSkip)
+    }
 
     fun getAppTheme(): Flow<AppTheme> {
         return getEnumFlow(SettingsKeys.APP_THEME, AppTheme.SYSTEM)

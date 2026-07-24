@@ -6,6 +6,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import one.felsen.auraquiz.settings.SettingsViewModel
 import one.felsen.auraquiz.ui.screen.settings.SettingsDecks
+import one.felsen.auraquiz.ui.screen.settings.SettingsSchedulerScreen
 import one.felsen.auraquiz.ui.screen.settings.SettingsScreen
 import one.felsen.auraquiz.ui.screen.settings.SettingsSynchronization
 
@@ -43,6 +44,12 @@ fun HomeNavigation(settingsViewModel: SettingsViewModel) {
             }
             entry<SettingsDecks> {
                 SettingsDecks(
+                    settingsViewModel = settingsViewModel,
+                    onBack = { onBack() }
+                )
+            }
+            entry<SettingsSchedulerScreen> {
+                SettingsSchedulerScreen(
                     settingsViewModel = settingsViewModel,
                     onBack = { onBack() }
                 )

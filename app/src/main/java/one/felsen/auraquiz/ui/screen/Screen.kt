@@ -17,3 +17,5 @@ object SettingsDecks : Screen
 
 @Serializable
 object SettingsSynchronization : Screen
+
+object SettingsSchedulerScreen : Screen

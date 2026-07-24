@@ -13,22 +13,26 @@ fun <T> SettingSingleChoiceRow(
     selected: T?,
     labelFor: (T) -> String,
     onSelect: (T) -> Unit,
+    description: String? = null
 ) {
-    var showSheet by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
 
     SettingCategoryRow(
         title = title,
-        description = if(selected!= null) labelFor(selected) else "",
-        onClick = { showSheet = true }
+        description = if (description != null) "$description\n" else "" + if (selected != null) labelFor(
+            selected
+        ) else "",
+        onClick = { showDialog = true }
     )
-    if (showSheet) {
-        SingleChoiceBottomSheet(
+
+    if (showDialog) {
+        SingleChoiceDialog(
             title = title,
             options = options,
             selected = selected,
-            labelFor = { labelFor(it) },
+            labelFor = labelFor,
             onSelect = onSelect,
-            onDismiss = { showSheet = false }
+            onDismiss = { showDialog = false }
         )
     }
 }
