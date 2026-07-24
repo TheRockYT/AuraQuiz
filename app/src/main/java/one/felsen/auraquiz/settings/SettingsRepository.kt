@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.map
 private val Context.dataStore by preferencesDataStore(name = "settings")
 
 
-class SettingsRepository(private val context: Context) {
+class SettingsRepository(val context: Context) {
 
 
     fun getAppTheme(): Flow<AppTheme> {
@@ -20,6 +20,14 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setAppTheme(theme: AppTheme) {
         setEnum(SettingsKeys.APP_THEME, theme)
+    }
+
+    fun isOnLockScreen(): Flow<Boolean> {
+        return getFlow(SettingsKeys.IS_ON_LOCK_SCREEN, false)
+    }
+
+    suspend fun setOnLockScreen(isOnLockScreen: Boolean) {
+        set(SettingsKeys.IS_ON_LOCK_SCREEN, isOnLockScreen)
     }
 
 

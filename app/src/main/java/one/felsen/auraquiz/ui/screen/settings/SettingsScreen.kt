@@ -59,11 +59,15 @@ fun SettingsScreen(
             onSelect = { settingsViewModel.setAppTheme(it) },
         )
 
+        val isOnLockscreen by settingsViewModel.isOnLockScreen.collectAsStateWithLifecycle(false)
+
         SettingToggleRow(
             title = "Show on lockscreen",
             description = "The device may be locked and accessed by other persons.",
-            checked = true,
-            onCheckedChange = { ProcessManager.checkPermissionAndStartService(context) }
+            checked = isOnLockscreen,
+            onCheckedChange = {
+                settingsViewModel.setOnLockScreen(!isOnLockscreen)
+            }
         )
 
         SettingCategoryRow(
