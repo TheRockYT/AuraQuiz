@@ -11,11 +11,14 @@ activityCompose = "1.13.0"
 kotlin = "2.4.0"
 composeBom = "2026.06.01"
 ksp = "2.3.10"
+navigation3 = "1.1.4"
 room3Runtime = "3.0.0"
 sqliteBundled = "2.7.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
+androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
 androidx-room3-compiler = { module = "androidx.room3:room3-compiler", version.ref = "room3Runtime" }
 androidx-room3-runtime = { module = "androidx.room3:room3-runtime", version.ref = "room3Runtime" }
 fsrskt = { module = "one.felsen.fsrskt:fsrskt", version.ref = "fsrskt" }
