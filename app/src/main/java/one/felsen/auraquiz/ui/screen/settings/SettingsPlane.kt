@@ -15,14 +15,22 @@ import androidx.compose.ui.Modifier
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsPlane(title: String, onBack: () -> Unit, content: @Composable () -> Unit) {
-    Scaffold(topBar = {
-        TopAppBar(title = { Text(title) }, navigationIcon = {
-            IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-            }
-        })
-    }) { innerPadding ->
+fun SettingsPlane(
+    title: String,
+    onBack: () -> Unit,
+    floatingActionButton: @Composable () -> Unit = {},
+    content: @Composable () -> Unit
+) {
+    Scaffold(
+        topBar = {
+            TopAppBar(title = { Text(title) }, navigationIcon = {
+                IconButton(onClick = onBack) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                }
+            })
+        },
+        floatingActionButton = floatingActionButton
+    ) { innerPadding ->
         Column(Modifier.padding(innerPadding)) {
             content()
         }

@@ -1,5 +1,7 @@
 package one.felsen.auraquiz.ui.screen.settings
 
+import android.content.Intent
+import android.provider.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
@@ -7,6 +9,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import one.felsen.auraquiz.settings.AppTheme
 import one.felsen.auraquiz.settings.SettingsViewModel
@@ -65,12 +69,22 @@ fun SettingsScreen(
         )
 
         val isOnLockscreen by settingsViewModel.isOnLockScreen.collectAsStateWithLifecycle(false)
+        val context = LocalContext.current
 
         SettingToggleRow(
             title = "Show on lockscreen",
-            description = "The device may be locked and accessed by other persons.",
-            checked = isOnLockscreen,
+            description = "Shows the quiz on the lockscreen",
+            checked = isOnLockscreen && Settings.canDrawOverlays(context),
             onCheckedChange = {
+                if (!Settings.canDrawOverlays(context)) {
+                    val intent = Intent(
+                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        "package:${context.packageName}".toUri(),
+                    )
+                    context.startActivity(intent)
+                    return@SettingToggleRow
+                }
+
                 settingsViewModel.setOnLockScreen(!isOnLockscreen)
             }
         )
