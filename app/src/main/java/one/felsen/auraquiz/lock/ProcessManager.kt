@@ -9,16 +9,15 @@ import androidx.core.net.toUri
 
 object ProcessManager {
     fun stopLockService(context: Context) {
-        Log.d("AQOverlay", "Stopping service...")
-        LockScreenPrefs.setServiceEnabled(context, false)
+        Log.d("Overlay", "Stopping service...")
         val serviceIntent = Intent(context, LockScreenService::class.java)
         context.stopService(serviceIntent)
     }
 
     fun checkPermissionAndStartService(context: Context) {
-        Log.d("AQOverlay", "Attempting to start service...")
+        Log.d("Overlay", "Attempting to start service...")
         if (!Settings.canDrawOverlays(context)) {
-            Log.d("AQOverlay", "No permission to draw overlays")
+            Log.d("Overlay", "No permission to draw overlays")
 
             val intent = Intent(
                 Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
@@ -26,16 +25,14 @@ object ProcessManager {
             )
             context.startActivity(intent)
         } else {
-            Log.d("AQOverlay", "Permission granted")
-
-            LockScreenPrefs.setServiceEnabled(context, true)
+            Log.d("Overlay", "Permission granted")
 
             val serviceIntent = Intent(context, LockScreenService::class.java)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                Log.d("AQOverlay", "Starting foreground service")
+                Log.d("Overlay", "Starting foreground service")
                 context.startForegroundService(serviceIntent)
             } else {
-                Log.d("AQOverlay", "Starting service")
+                Log.d("Overlay", "Starting service")
                 context.startService(serviceIntent)
             }
         }

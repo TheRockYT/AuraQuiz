@@ -1,6 +1,6 @@
 package one.felsen.auraquiz.lock
 
-import android.R
+import android.R.drawable
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
@@ -42,7 +42,7 @@ class LockScreenService : Service() {
         val notification = NotificationCompat.Builder(this, "lock_service_channel")
             .setContentTitle("Lock Screen Active")
             .setContentText("Listening for screen wake...")
-            .setSmallIcon(R.drawable.ic_lock_lock)
+            .setSmallIcon(drawable.ic_lock_lock)
             .build()
             
         startForeground(1, notification)
