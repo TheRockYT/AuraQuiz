@@ -1,20 +1,28 @@
 package one.felsen.auraquiz.ui.screen.settings
 
+import android.net.Uri
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Upload
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButtonMenu
 import androidx.compose.material3.FloatingActionButtonMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleFloatingActionButton
 import androidx.compose.material3.ToggleFloatingActionButtonDefaults.animateIcon
@@ -29,42 +37,50 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import one.felsen.auraquiz.settings.SettingsViewModel
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import one.felsen.auraquiz.ui.screen.deck.DeckViewModel
+import one.felsen.auraquiz.ui.screen.settings.components.FilePickerScreen
+import kotlin.uuid.Uuid
 
 @Composable
-fun SettingsDecks(onBack: () -> Unit, settingsViewModel: SettingsViewModel) {
+fun SettingsDecks(
+    onBack: () -> Unit,
+    onSelectDeck: (Uuid) -> Unit,
+    onSelectImport: (Uri) -> Unit,
+    onSelectCreate: () -> Unit,
+    deckViewModel: DeckViewModel
+) {
+    val decks by deckViewModel.decks.collectAsStateWithLifecycle(listOf())
+
     val listState = rememberLazyListState()
     val fabVisible by remember { derivedStateOf { listState.firstVisibleItemIndex == 0 } }
 
     var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
 
-    val items =
-        listOf(
-            Icons.Filled.Add to "Create",
-            Icons.Filled.Upload to "Import",
-        )
+    val items = listOf(
+        Icons.Filled.Add to "Create",
+        Icons.Filled.Upload to "Import",
+    )
+
+    var showUploadDialog by remember { mutableStateOf(false) }
 
     SettingsPlane(
-        title = "Decks",
-        onBack = onBack,
-        floatingActionButton = {
+        title = "Decks", onBack = onBack, floatingActionButton = {
             FloatingActionButtonMenu(
-                expanded = fabMenuExpanded,
-                button = {
+                expanded = fabMenuExpanded, button = {
                     ToggleFloatingActionButton(
-                        modifier =
-                            Modifier
-                                .animateFloatingActionButton(
-                                    visible = fabVisible || fabMenuExpanded,
-                                    alignment = Alignment.BottomEnd
-                                ),
+                        modifier = Modifier.animateFloatingActionButton(
+                            visible = fabVisible || fabMenuExpanded,
+                            alignment = Alignment.BottomEnd
+                        ),
                         checked = fabMenuExpanded,
-                        onCheckedChange = { fabMenuExpanded = !fabMenuExpanded }
-                    ) {
+                        onCheckedChange = { fabMenuExpanded = !fabMenuExpanded }) {
                         val imageVector by remember {
                             derivedStateOf {
-                                // checkedProgress - provides the value of button's state that we use here to update th icon
                                 if (checkedProgress > 0.5f) Icons.Filled.Close else Icons.Filled.Add
                             }
                         }
@@ -74,43 +90,135 @@ fun SettingsDecks(onBack: () -> Unit, settingsViewModel: SettingsViewModel) {
                             modifier = Modifier.animateIcon({ checkedProgress })
                         )
                     }
-                }
-            ) {
-                items.forEachIndexed { i, item ->
+                }) {
+                items.forEachIndexed { _, item ->
                     FloatingActionButtonMenuItem(
-                        onClick = { fabMenuExpanded = false },
+                        onClick = {
+                            fabMenuExpanded = false
+
+                            when (item.second) {
+                                "Create" -> onSelectCreate()
+                                "Import" -> showUploadDialog = true
+                            }
+                        },
                         icon = { Icon(item.first, contentDescription = null) },
                         text = { Text(text = item.second) },
                     )
                 }
             }
-        }
-    ) {
-        LazyColumn(state = listState) {
-            for (index in 0 until 50) {
-                item {
-                    Text(
-                        text = "Item - $index",
-                        modifier = Modifier.fillMaxWidth().padding(24.dp)
-                    )
+        }) {
+
+        if (decks.isEmpty()) {
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text("No Decks Yet")
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "Get Started by creating or importing a deck"
+                        )
+                    }
+                }
+            }
+        } else {
+            LazyColumn(
+                state = listState,
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                itemsIndexed(
+                    items = decks,
+                    key = { _, deck -> deck.id } // Replace deck.id with a unique identifier if available
+                ) { index, deck ->
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                        onClick = {
+                            onSelectDeck(deck.id)
+                        }
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(2.dp)
+                            ) {
+                                Text(
+                                    text = "${index + 1}",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Text(
+                                    text = "${index + 1}",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.secondary
+                                )
+                                Text(
+                                    text = "${index + 1}",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.tertiary
+                                )
+                            }
+
+                            // Deck Title and Description
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(
+                                    text = deck.name,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .basicMarquee(),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+
+                                Text(
+                                    text = deck.description,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .basicMarquee(),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
 
-            Column {
-
-                Text(
-                    text = "No Decks Yet"
-                )
-                Text(
-                    text = "Get Started by creating or importing a deck"
-                )
-            }
+        if (showUploadDialog) {
+            FilePickerScreen(
+                title = "Select a file",
+                description = "Select a deck file to continue",
+                onFileSelected = { url ->
+                    onSelectImport(url)
+                    showUploadDialog = false
+                },
+                onDismiss = {
+                    showUploadDialog = false
+                })
         }
     }
 }

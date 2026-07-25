@@ -12,6 +12,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import one.felsen.auraquiz.data.AppDatabase
 import one.felsen.auraquiz.settings.AppTheme
 import one.felsen.auraquiz.settings.SettingsRepository
 import one.felsen.auraquiz.settings.SettingsViewModel
@@ -26,6 +27,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             val context = LocalContext.current.applicationContext
 
+            val database = AppDatabase.getInstance(context)
+
             val settingsViewModel =
                 viewModel { SettingsViewModel(SettingsRepository(context)) }
 
@@ -39,7 +42,7 @@ class MainActivity : ComponentActivity() {
             }
 
             AuraQuizTheme(darkTheme = darkTheme, dynamicColor = dynamicColor) {
-                HomeNavigation(settingsViewModel = settingsViewModel)
+                HomeNavigation(settingsViewModel = settingsViewModel, database = database)
             }
         }
     }

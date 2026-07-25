@@ -23,8 +23,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.felsen.auraquiz.data.AppDatabase
-import one.felsen.auraquiz.data.NoteRepository
-import one.felsen.auraquiz.data.NotesViewModel
+import one.felsen.auraquiz.data.note.NoteRepository
+import one.felsen.auraquiz.data.note.NotesViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
