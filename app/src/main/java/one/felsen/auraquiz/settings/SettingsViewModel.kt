@@ -7,6 +7,12 @@ import one.felsen.auraquiz.lock.ProcessManager
 
 class SettingsViewModel(private val repo: SettingsRepository) : ViewModel() {
 
+    val dynamicColor = repo.getDynamicColor()
+
+    fun setDynamicColor(dynamicColor: Boolean) {
+        viewModelScope.launch { repo.setDynamicColor(dynamicColor) }
+    }
+
     val maxNew = repo.getMaxNew()
 
     fun setMaxNew(maxNew: Int) {

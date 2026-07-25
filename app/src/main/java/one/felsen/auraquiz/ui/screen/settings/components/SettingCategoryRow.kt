@@ -5,6 +5,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,15 +18,19 @@ fun SettingCategoryRow(
     onClick: () -> Unit
 ) {
     ListItem(
-        headlineContent = { Text(title) },
-        supportingContent = description?.let { { Text(it) } },
+        modifier = Modifier.clickable(onClick = onClick),
+        leadingContent = null,
         trailingContent = {
-            Icon(
-                imageVector = Icons.Default.ChevronRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        },
-        modifier = Modifier.clickable(onClick = onClick)
+                Icon(
+                    imageVector = Icons.Default.ChevronRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            },
+        overlineContent = null,
+        supportingContent = description?.let { { Text(it) } },
+        colors = ListItemDefaults.colors(),
+        elevation = ListItemDefaults.elevation(ListItemDefaults.Elevation),
+        content = { Text(title) },
     )
 }

@@ -10,4 +10,5 @@ object SettingsKeys {
     val FAST_SKIP = stringPreferencesKey("scheduler_fast_skip")
 
     val MAX_NEW = intPreferencesKey("scheduler_max_new")
+    val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
 }

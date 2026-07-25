@@ -13,6 +13,14 @@ private val Context.dataStore by preferencesDataStore(name = "settings")
 
 class SettingsRepository(val context: Context) {
 
+    fun getDynamicColor(): Flow<Boolean> {
+        return getFlow(SettingsKeys.DYNAMIC_COLOR, true)
+    }
+
+    suspend fun setDynamicColor(dynamicColor: Boolean) {
+        set(SettingsKeys.DYNAMIC_COLOR, dynamicColor)
+    }
+
     fun getMaxNew(): Flow<Int> {
         return getFlow(SettingsKeys.MAX_NEW, 30)
     }

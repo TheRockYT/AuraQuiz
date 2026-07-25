@@ -1,6 +1,7 @@
 package one.felsen.auraquiz.ui.screen.settings
 
 import android.content.Intent
+import android.os.Build
 import android.provider.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -66,6 +67,16 @@ fun SettingsScreen(
             selected = appTheme,
             labelFor = { it.label },
             onSelect = { settingsViewModel.setAppTheme(it) }
+        )
+
+        val dynamicColor by settingsViewModel.dynamicColor.collectAsStateWithLifecycle(false)
+
+        SettingToggleRow(
+            title = "Dynamic Colors",
+            description = "Enable dynamic colors",
+            checked = dynamicColor,
+            onCheckedChange = { settingsViewModel.setDynamicColor(it) },
+            enabled = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
         )
 
         val isOnLockscreen by settingsViewModel.isOnLockScreen.collectAsStateWithLifecycle(false)

@@ -30,6 +30,7 @@ class MainActivity : ComponentActivity() {
                 viewModel { SettingsViewModel(SettingsRepository(context)) }
 
             val theme by settingsViewModel.appTheme.collectAsState(AppTheme.SYSTEM)
+            val dynamicColor by settingsViewModel.dynamicColor.collectAsState(false)
 
             val darkTheme = when (theme) {
                 AppTheme.LIGHT -> false
@@ -37,7 +38,7 @@ class MainActivity : ComponentActivity() {
                 AppTheme.SYSTEM -> isSystemInDarkTheme()
             }
 
-            AuraQuizTheme(darkTheme = darkTheme) {
+            AuraQuizTheme(darkTheme = darkTheme, dynamicColor = dynamicColor) {
                 HomeNavigation(settingsViewModel = settingsViewModel)
             }
         }
