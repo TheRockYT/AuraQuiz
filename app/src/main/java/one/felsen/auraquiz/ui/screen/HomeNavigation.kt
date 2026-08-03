@@ -1,6 +1,5 @@
 package one.felsen.auraquiz.ui.screen
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -14,6 +13,7 @@ import one.felsen.auraquiz.data.deck.DeckRepository
 import one.felsen.auraquiz.settings.SettingsViewModel
 import one.felsen.auraquiz.ui.screen.deck.DeckEditorScreen
 import one.felsen.auraquiz.ui.screen.deck.DeckViewModel
+import one.felsen.auraquiz.ui.screen.deck.card.CardEditorScreen
 import one.felsen.auraquiz.ui.screen.settings.SettingsDecks
 import one.felsen.auraquiz.ui.screen.settings.SettingsSchedulerScreen
 import one.felsen.auraquiz.ui.screen.settings.SettingsScreen
@@ -109,7 +109,16 @@ fun HomeNavigation(
                 }
 
                 is DeckOverviewScreen -> NavEntry(key) {
-                    Text(key.uuid.toString())
+                    CardEditorScreen(
+                        isEditing = true,
+                        onNavigateBack = {},
+                        onSave = { type, map ->
+
+                        },
+                        onDelete = {
+
+                        }
+                    )
                 }
 
                 else -> throw IllegalArgumentException("Unknown screen: $key")
