@@ -1,6 +1,7 @@
 package one.felsen.auraquiz.lock
 
 import android.R.drawable
+import android.app.KeyguardManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
@@ -10,33 +11,46 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import android.os.IBinder
+import android.util.Log
 import androidx.core.app.NotificationCompat
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.registerReceiver
 
 class LockScreenService : Service() {
 
-    companion object {
-        private val _isServiceRunning = MutableStateFlow(false)
-        val isServiceRunning: StateFlow<Boolean> = _isServiceRunning.asStateFlow()
-    }
-
     private val screenReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            if (intent.action == Intent.ACTION_SCREEN_ON) {
-                val lockIntent = Intent(context, LockScreenActivity::class.java).apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                }
-                context.startActivity(lockIntent)
+            Log.d("LockScreenService", "Received screen on event: ${intent.action}")
+            if (intent.action != Intent.ACTION_SCREEN_ON) {
+                Log.d("LockScreenService", "Received unexpected intent: ${intent.action}")
+                return
             }
+
+            val keyguardManager =
+                context.getSystemService(KEYGUARD_SERVICE) as KeyguardManager
+            if (!keyguardManager.isKeyguardLocked) {
+                Log.d("LockScreenService", "Keyguard dismissed. Finishing activity.")
+                return
+            }
+
+            if (LockScreenActivity.isShowing) {
+                Log.d("LockScreenService", "LockScreenService is already showing!")
+                return
+            }
+
+            Log.d("LockScreenService", "Launching intent for ${intent.action}")
+
+            val lockIntent = Intent(context, LockScreenActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            }
+            context.startActivity(lockIntent)
         }
     }
 
     override fun onCreate() {
         super.onCreate()
 
-        _isServiceRunning.value = true
+        Log.d("LockScreenService", "Created LockScreenService")
 
         createNotificationChannel()
         val notification = NotificationCompat.Builder(this, "lock_service_channel")
@@ -44,18 +58,22 @@ class LockScreenService : Service() {
             .setContentText("Listening for screen wake...")
             .setSmallIcon(drawable.ic_lock_lock)
             .build()
-            
+
         startForeground(1, notification)
 
         // Register receiver for screen on
-        registerReceiver(screenReceiver, IntentFilter(Intent.ACTION_SCREEN_ON))
+        registerReceiver(
+            this,
+            screenReceiver,
+            IntentFilter(Intent.ACTION_SCREEN_ON),
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
     }
 
     override fun onDestroy() {
         super.onDestroy()
 
-        _isServiceRunning.value = false
-
+        Log.d("LockScreenService", "Destroyed LockScreenService")
         unregisterReceiver(screenReceiver)
     }
 
