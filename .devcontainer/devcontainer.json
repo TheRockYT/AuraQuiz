@@ -1,6 +1,9 @@
 {
   "name": "IntelliJ Java",
   "image": "mcr.microsoft.com/devcontainers/java:17",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,options=Z",
+  "workspaceFolder": "/workspace",
+  "updateRemoteUserUID": true,
   "customizations": {
     "jetbrains": {
       "backend": "IntelliJ"
