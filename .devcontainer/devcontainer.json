@@ -1,4 +1,11 @@
 {
+  "name": "IntelliJ Java",
+  "image": "mcr.microsoft.com/devcontainers/java:17",
+  "customizations": {
+    "jetbrains": {
+      "backend": "IntelliJ"
+    }
+  },
   "features": {
     "ghcr.io/devcontainers/features/sshd:1": {
       "version": "latest"
