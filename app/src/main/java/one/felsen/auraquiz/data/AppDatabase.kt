@@ -5,17 +5,19 @@ import androidx.room3.ColumnTypeConverters
 import androidx.room3.Database
 import androidx.room3.Room
 import androidx.room3.RoomDatabase
+import one.felsen.auraquiz.data.card.CardDao
+import one.felsen.auraquiz.data.card.CardDataEntity
+import one.felsen.auraquiz.data.card.CardEntity
+import one.felsen.auraquiz.data.card.ReviewLogEntity
 import one.felsen.auraquiz.data.deck.DeckDao
 import one.felsen.auraquiz.data.deck.DeckEntity
-import one.felsen.auraquiz.data.note.NoteDao
-import one.felsen.auraquiz.data.note.NoteEntity
 
-@Database(entities = [NoteEntity::class, DeckEntity::class], version = 1)
+@Database(entities = [DeckEntity::class, CardEntity::class, CardDataEntity::class, ReviewLogEntity::class], version = 1)
 @ColumnTypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun noteDao(): NoteDao
-
     abstract fun deckDao(): DeckDao
+
+    abstract fun cardDao(): CardDao
 
     companion object {
         @Volatile

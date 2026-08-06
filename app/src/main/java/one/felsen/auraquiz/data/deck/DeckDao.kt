@@ -1,6 +1,7 @@
 package one.felsen.auraquiz.data.deck
 
 import androidx.room3.Dao
+import androidx.room3.Delete
 import androidx.room3.Insert
 import androidx.room3.OnConflictStrategy
 import androidx.room3.Query
@@ -22,4 +23,7 @@ interface DeckDao {
 
     @Query("SELECT * FROM decks ORDER BY updatedTimestamp DESC")
     fun getAllDecks(): Flow<List<DeckEntity>>
+
+    @Delete
+    suspend fun deleteDeck(deck: DeckEntity)
 }

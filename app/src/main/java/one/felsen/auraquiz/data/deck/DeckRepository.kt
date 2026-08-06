@@ -13,4 +13,6 @@ class DeckRepository(
         updateDeck(deck.copy(updatedTimestamp = System.currentTimeMillis()))
     }
     fun getAllDecks(): Flow<List<DeckEntity>> = deckDao.getAllDecks()
+
+    suspend fun deleteDeck(deck: DeckEntity) = deckDao.deleteDeck(deck)
 }
