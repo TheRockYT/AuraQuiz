@@ -26,6 +26,7 @@ data class CardEntity(
     val title: String,
     val hint: String,
     val explanation: String,
+    val data: CardData,
     val active: Boolean = true,
     val creationTimestamp: Long = System.currentTimeMillis(),
     val updatedTimestamp: Long = System.currentTimeMillis(),
