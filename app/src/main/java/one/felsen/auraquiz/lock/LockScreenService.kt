@@ -29,16 +29,16 @@ class LockScreenService : Service() {
             val keyguardManager =
                 context.getSystemService(KEYGUARD_SERVICE) as KeyguardManager
             if (!keyguardManager.isKeyguardLocked) {
-                Log.d("LockScreenService", "Keyguard dismissed. Finishing activity.")
+                Log.d("LockScreenService", "Keyguard dismissed. Not launching lock UI.")
                 return
             }
 
             if (LockScreenActivity.isShowing) {
-                Log.d("LockScreenService", "LockScreenService is already showing!")
+                Log.d("LockScreenService", "LockScreenActivity is already showing!")
                 return
             }
 
-            Log.d("LockScreenService", "Launching intent for ${intent.action}")
+            Log.d("LockScreenService", "Attempting to launch lock UI for ${intent.action}")
 
             val lockIntent = Intent(context, LockScreenActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
@@ -81,13 +81,15 @@ class LockScreenService : Service() {
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
+            val manager = getSystemService(NotificationManager::class.java)
+
+            // Channel for the foreground service (low importance)
+            val serviceChannel = NotificationChannel(
                 "lock_service_channel",
                 "Lock Screen Service",
                 NotificationManager.IMPORTANCE_LOW
             )
-            val manager = getSystemService(NotificationManager::class.java)
-            manager.createNotificationChannel(channel)
+            manager.createNotificationChannel(serviceChannel)
         }
     }
 }
