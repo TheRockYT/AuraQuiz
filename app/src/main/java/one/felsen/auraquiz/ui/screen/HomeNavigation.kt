@@ -1,18 +1,17 @@
 package one.felsen.auraquiz.ui.screen
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.runtime.remember
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import one.felsen.auraquiz.data.AppDatabase
+import one.felsen.auraquiz.data.card.CardRepository
 import one.felsen.auraquiz.data.deck.DeckRepository
 import one.felsen.auraquiz.settings.SettingsViewModel
-import one.felsen.auraquiz.ui.screen.deck.DeckEditorScreen
-import one.felsen.auraquiz.ui.screen.deck.DeckViewModel
+import one.felsen.auraquiz.ui.screen.deck.DeckScreen
+import one.felsen.auraquiz.ui.screen.deck.DeckUpsertScreen
 import one.felsen.auraquiz.ui.screen.deck.card.CardEditorScreen
 import one.felsen.auraquiz.ui.screen.settings.SettingsDecks
 import one.felsen.auraquiz.ui.screen.settings.SettingsSchedulerScreen
@@ -22,11 +21,11 @@ import one.felsen.auraquiz.ui.screen.settings.SettingsSynchronization
 
 @Composable
 fun HomeNavigation(
-    settingsViewModel: SettingsViewModel,
-    database: AppDatabase
+    settingsViewModel: SettingsViewModel, database: AppDatabase
 ) {
 
-    val deckViewModel = viewModel { DeckViewModel(DeckRepository(database.deckDao())) }
+    val deckRepository = remember { DeckRepository(database.deckDao()) }
+    val cardRepository = remember { CardRepository(database.cardDao()) }
 
     val backStack = rememberNavBackStack(Quiz)
 
@@ -38,22 +37,15 @@ fun HomeNavigation(
         backStack.add(screen)
     }
 
-    LaunchedEffect(Unit) {
-        deckViewModel.navEvents.collect { event ->
-            when (event) {
-                is NavEvent.NavigateTo -> navigate(event.destination)
-                NavEvent.PopBackStack -> onBack()
-            }
-        }
+    fun replaceScreen(screen: Screen) {
+        onBack()
+        navigate(screen)
     }
-    val isDeckCreating by deckViewModel.creatingDeck.collectAsStateWithLifecycle()
-
-    LoadingDialog(isLoading = isDeckCreating)
 
     NavDisplay(
-        backStack = backStack,
-        onBack = { onBack() },
-        entryProvider = { key ->
+        backStack = backStack, onBack = { onBack() }, entryDecorators = listOf(
+            rememberViewModelStoreNavEntryDecorator()
+        ), entryProvider = { key ->
             when (key) {
                 is Quiz -> NavEntry(key) {
                     HomeScreen(onOpenSettings = { navigate(Settings) })
@@ -63,15 +55,12 @@ fun HomeNavigation(
                     SettingsScreen(
                         settingsViewModel = settingsViewModel,
                         onBack = { onBack() },
-                        onCategorySelect = { navigate(it) }
-                    )
+                        onCategorySelect = { navigate(it) })
                 }
 
                 is SettingsSynchronization -> NavEntry(key) {
                     SettingsSynchronization(
-                        settingsViewModel = settingsViewModel,
-                        onBack = { onBack() }
-                    )
+                        settingsViewModel = settingsViewModel, onBack = { onBack() })
                 }
 
                 is SettingsDecks -> NavEntry(key) {
@@ -79,29 +68,36 @@ fun HomeNavigation(
                         onBack = { onBack() },
                         onSelectImport = { navigate(DeckImportScreen(it)) },
                         onSelectCreate = { navigate(DeckCreateScreen) },
-                        deckViewModel = deckViewModel,
+                        deckRepository = deckRepository,
                         onSelectDeck = {
                             navigate(DeckOverviewScreen(it))
-                        }
-                    )
+                        })
                 }
 
                 is SettingsSchedulerScreen -> NavEntry(key) {
                     SettingsSchedulerScreen(
-                        settingsViewModel = settingsViewModel,
-                        onBack = { onBack() }
-                    )
+                        settingsViewModel = settingsViewModel, onBack = { onBack() })
                 }
 
                 is DeckCreateScreen -> NavEntry(key) {
-                    DeckEditorScreen(
-                        isEditMode = false,
-                        onSave = { name, description, authors, _ ->
+                    DeckUpsertScreen(
+                        uuid = null,
+                        deckRepository = deckRepository,
+                        onBack = { onBack() },
+                        navigateToDeck = { replaceScreen(DeckOverviewScreen(it)) },
+                        onDelete = { onBack() })
+                }
+
+                is EditDeckScreen -> NavEntry(key) {
+                    DeckUpsertScreen(
+                        uuid = key.uuid,
+                        deckRepository = deckRepository,
+                        onBack = { onBack() },
+                        navigateToDeck = { onBack() },
+                        onDelete = {
                             onBack()
-                            deckViewModel.createDeck(name, description, authors)
-                        },
-                        onCancel = { onBack() }
-                    )
+                            onBack()
+                        })
                 }
 
                 is DeckImportScreen -> NavEntry(key) {
@@ -109,20 +105,25 @@ fun HomeNavigation(
                 }
 
                 is DeckOverviewScreen -> NavEntry(key) {
-                    CardEditorScreen(
-                        isEditing = true,
-                        onNavigateBack = {},
-                        onSave = { type, map ->
+                    DeckScreen(
+                        onBack = { onBack() },
+                        deckId = key.uuid,
+                        onSelectCard = { cardId ->
+                            // Handle card selection
+                        }, cardRepository = cardRepository, onEditDeckClick = {
+                            navigate(EditDeckScreen(key.uuid))
+                        }, onSelectCreateCard = {
+                            navigate(CreateCardScreen(key.uuid))
+                        })
+                }
 
-                        },
-                        onDelete = {
+                is CreateCardScreen -> NavEntry(key) {
+                    CardEditorScreen(isEditing = false, onBack = { onBack() }, onSave = { type, map -> }, onDelete = {
 
-                        }
-                    )
+                    })
                 }
 
                 else -> throw IllegalArgumentException("Unknown screen: $key")
             }
-        }
-    )
+        })
 }

@@ -11,11 +11,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CardEditorScreen(
     isEditing: Boolean = false,
-    onNavigateBack: () -> Unit,
+    onBack: () -> Unit,
     onSave: (CardType, Map<String, String>) -> Unit, // In a real app, pass your sealed class here
     onDelete: () -> Unit
 ) {
@@ -30,7 +29,7 @@ fun CardEditorScreen(
             CenterAlignedTopAppBar(
                 title = { Text(if (isEditing) "Edit Card" else "New Card") },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
+                    IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 },

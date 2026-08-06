@@ -13,6 +13,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.FilledTonalButton
@@ -48,7 +49,8 @@ fun DeckEditorScreen(
     initialDescription: String = "",
     initialAuthors: String = "",
     initialCreationDateMillis: Long? = null,
-    onCancel: () -> Unit = {},
+    onBack: () -> Unit = {},
+    onDelete: () -> Unit = {},
     onSave: (name: String, description: String, authors: String, creationDateMillis: Long?) -> Unit = { _, _, _, _ -> }
 ) {
     var name by remember { mutableStateOf(initialName) }
@@ -66,7 +68,7 @@ fun DeckEditorScreen(
             TopAppBar(
                 title = { Text(title) },
                 navigationIcon = {
-                    IconButton(onClick = onCancel) {
+                    IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Cancel"
@@ -74,6 +76,11 @@ fun DeckEditorScreen(
                     }
                 },
                 actions = {
+                    if (isEditMode) {
+                        IconButton(onClick = onDelete) {
+                            Icon(Icons.Default.Delete, contentDescription = "Delete Card", tint = MaterialTheme.colorScheme.error)
+                        }
+                    }
                     IconButton(
                         onClick = {
                             onSave(

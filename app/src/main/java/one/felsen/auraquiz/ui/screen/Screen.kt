@@ -25,9 +25,15 @@ object SettingsSchedulerScreen : Screen
 @Serializable
 object DeckCreateScreen : Screen
 
+data class EditDeckScreen(val uuid: Uuid) : Screen
+
 data class DeckOverviewScreen(val uuid: Uuid) : Screen
 
 data class DeckImportScreen(val url: Uri) : Screen
+
+data class CreateCardScreen(val deck: Uuid) : Screen
+
+data class EditCardScreen(val deck: Uuid, val uuid: Uuid) : Screen
 
 sealed interface NavEvent {
     data class NavigateTo(val destination: Screen) : NavEvent

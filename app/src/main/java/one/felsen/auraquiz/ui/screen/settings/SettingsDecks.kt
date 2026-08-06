@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -38,11 +37,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import one.felsen.auraquiz.ui.screen.deck.DeckViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import one.felsen.auraquiz.data.deck.DeckRepository
+import one.felsen.auraquiz.ui.UiState
+import one.felsen.auraquiz.ui.screen.diolog.ErrorDialog
+import one.felsen.auraquiz.ui.screen.diolog.LoadingDialog
+import one.felsen.auraquiz.viewmodel.DecksViewModel
 import one.felsen.auraquiz.ui.screen.settings.components.FilePickerScreen
 import kotlin.uuid.Uuid
 
@@ -52,9 +54,10 @@ fun SettingsDecks(
     onSelectDeck: (Uuid) -> Unit,
     onSelectImport: (Uri) -> Unit,
     onSelectCreate: () -> Unit,
-    deckViewModel: DeckViewModel
+    deckRepository: DeckRepository
 ) {
-    val decks by deckViewModel.decks.collectAsStateWithLifecycle(listOf())
+    val decksViewModel = viewModel { DecksViewModel(deckRepository) }
+    val uiState by decksViewModel.uiState.collectAsStateWithLifecycle()
 
     val listState = rememberLazyListState()
     val fabVisible by remember { derivedStateOf { listState.firstVisibleItemIndex == 0 } }
@@ -74,11 +77,8 @@ fun SettingsDecks(
                 expanded = fabMenuExpanded, button = {
                     ToggleFloatingActionButton(
                         modifier = Modifier.animateFloatingActionButton(
-                            visible = fabVisible || fabMenuExpanded,
-                            alignment = Alignment.BottomEnd
-                        ),
-                        checked = fabMenuExpanded,
-                        onCheckedChange = { fabMenuExpanded = !fabMenuExpanded }) {
+                            visible = fabVisible || fabMenuExpanded, alignment = Alignment.BottomEnd
+                        ), checked = fabMenuExpanded, onCheckedChange = { fabMenuExpanded = !fabMenuExpanded }) {
                         val imageVector by remember {
                             derivedStateOf {
                                 if (checkedProgress > 0.5f) Icons.Filled.Close else Icons.Filled.Add
@@ -108,105 +108,119 @@ fun SettingsDecks(
             }
         }) {
 
-        if (decks.isEmpty()) {
-            Row(
-                modifier = Modifier.fillMaxSize(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Column {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Text("No Decks Yet")
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            text = "Get Started by creating or importing a deck"
-                        )
-                    }
-                }
+        when (val state = uiState) {
+            is UiState.Error -> {
+                ErrorDialog(
+                    message = state.message,
+                    onDismissRequest = { onBack() }
+                )
             }
-        } else {
-            LazyColumn(
-                state = listState,
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                itemsIndexed(
-                    items = decks,
-                    key = { _, deck -> deck.id } // Replace deck.id with a unique identifier if available
-                ) { index, deck ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                        onClick = {
-                            onSelectDeck(deck.id)
-                        }
+
+            is UiState.Loading -> {
+                LoadingDialog()
+            }
+
+            is UiState.Success -> {
+                val decks = state.data
+                if (decks.isEmpty()) {
+                    Row(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
+                        Column {
                             Row(
-                                horizontalArrangement = Arrangement.spacedBy(2.dp)
+                                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
+                            ) {
+                                Text("No Decks Yet")
+                            }
+                            Row(
+                                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
                             ) {
                                 Text(
-                                    text = "${index + 1}",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                                Text(
-                                    text = "${index + 1}",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.secondary
-                                )
-                                Text(
-                                    text = "${index + 1}",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.tertiary
+                                    text = "Get Started by creating or importing a deck"
                                 )
                             }
-
-                            // Deck Title and Description
-                            Column(
-                                modifier = Modifier.weight(1f),
-                                verticalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                Text(
-                                    text = deck.name,
+                        }
+                    }
+                } else {
+                    LazyColumn(
+                        state = listState,
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        itemsIndexed(
+                            items = decks,
+                            key = { _, deck -> deck.id } // Replace deck.id with a unique identifier if available
+                        ) { index, deck ->
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                                onClick = {
+                                    onSelectDeck(deck.id)
+                                }) {
+                                Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .basicMarquee(),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
+                                        .padding(16.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                                ) {
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(2.dp)
+                                    ) {
+                                        Text(
+                                            text = "${index + 1}",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                        Text(
+                                            text = "${index + 1}",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.secondary
+                                        )
+                                        Text(
+                                            text = "${index + 1}",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.tertiary
+                                        )
+                                    }
 
-                                Text(
-                                    text = deck.description,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .basicMarquee(),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    maxLines = 1
-                                )
+                                    // Deck Title and Description
+                                    Column(
+                                        modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Text(
+                                            text = deck.name,
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .basicMarquee(),
+                                            style = MaterialTheme.typography.titleMedium,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+
+                                        Text(
+                                            text = deck.description,
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .basicMarquee(),
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            maxLines = 1
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
         }
+
+
 
         if (showUploadDialog) {
             FilePickerScreen(
