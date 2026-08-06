@@ -44,6 +44,8 @@ class LockScreenActivity : ComponentActivity() {
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
 
+        Log.d("LockScreenActivity", "Window focus changed: $hasFocus")
+
         val keyguardManager = getSystemService(KEYGUARD_SERVICE) as KeyguardManager
         if (!keyguardManager.isKeyguardLocked) {
             Log.d("LockScreenActivity", "Keyguard dismissed. Finishing activity.")
@@ -151,6 +153,7 @@ class LockScreenActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        Log.d("LockScreenActivity", "Destroying LockScreenActivity")
         isShowing = false
         unregisterReceiver(unlockReceiver)
         unregisterReceiver(screenOffReceiver)
@@ -158,6 +161,7 @@ class LockScreenActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        Log.d("LockScreenActivity", "Resuming LockScreenActivity")
 
         val keyguardManager =
             getSystemService(KEYGUARD_SERVICE) as KeyguardManager
