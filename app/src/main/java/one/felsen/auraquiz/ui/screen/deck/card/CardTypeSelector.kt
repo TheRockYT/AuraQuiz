@@ -13,6 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import one.felsen.auraquiz.data.card.CardType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

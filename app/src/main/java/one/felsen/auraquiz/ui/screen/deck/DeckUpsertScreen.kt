@@ -1,15 +1,8 @@
 package one.felsen.auraquiz.ui.screen.deck
 
-import androidx.compose.foundation.gestures.snapping.SnapPosition
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.felsen.auraquiz.data.deck.DeckRepository
@@ -58,7 +51,7 @@ fun DeckUpsertScreen(
                         isEditMode = false,
                         onBack = onBack,
                         onSave = { name, description, authors, _ ->
-                            deckUpsertViewModel.createDeck(name, description, authors)
+                            deckUpsertViewModel.upsertDeck(name, description, authors)
                         },
                         onDelete = {
                             deckUpsertViewModel.deleteDeck()
@@ -75,7 +68,7 @@ fun DeckUpsertScreen(
                         initialAuthors = initialDeck.authors,
                         onBack = onBack,
                         onSave = { name, description, authors, _ ->
-                            deckUpsertViewModel.updateDeck(name, description, authors)
+                            deckUpsertViewModel.upsertDeck(name, description, authors)
                         },
                         onDelete = {
                             deckUpsertViewModel.deleteDeck()

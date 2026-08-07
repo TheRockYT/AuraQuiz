@@ -19,7 +19,7 @@ interface DeckDao {
     suspend fun getDeckById(id: Uuid): DeckEntity?
 
     @Update
-    suspend fun updateDeck(document: DeckEntity)
+    suspend fun updateDeck(deck: DeckEntity)
 
     @Query("SELECT * FROM decks ORDER BY updatedTimestamp DESC")
     fun getAllDecks(): Flow<List<DeckEntity>>

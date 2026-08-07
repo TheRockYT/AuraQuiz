@@ -8,6 +8,9 @@ import kotlin.uuid.Uuid
 interface CardDao {
 
 
+    @Query("SELECT * FROM cards WHERE id = :id")
+    suspend fun getCardById(id: Uuid): CardEntity?
+
     @Query(
         """
             SELECT * FROM cards
@@ -17,11 +20,14 @@ interface CardDao {
     )
     fun getCards(deckId: Uuid): Flow<List<CardEntity>>
 
-    @Upsert
-    suspend fun upsertCard(card: CardEntity)
+    @Insert
+    suspend fun insertCard(card: CardEntity)
 
-    @Upsert
-    suspend fun upsertCardData(cardData: CardDataEntity)
+    @Update
+    suspend fun updateCard(card: CardEntity)
+
+    @Delete
+    suspend fun deleteCard(card: CardEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertReviewLog(log: ReviewLogEntity)

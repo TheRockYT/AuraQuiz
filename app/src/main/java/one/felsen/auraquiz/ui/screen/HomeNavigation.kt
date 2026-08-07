@@ -12,7 +12,7 @@ import one.felsen.auraquiz.data.deck.DeckRepository
 import one.felsen.auraquiz.settings.SettingsViewModel
 import one.felsen.auraquiz.ui.screen.deck.DeckScreen
 import one.felsen.auraquiz.ui.screen.deck.DeckUpsertScreen
-import one.felsen.auraquiz.ui.screen.deck.card.CardEditorScreen
+import one.felsen.auraquiz.ui.screen.deck.card.CardScreen
 import one.felsen.auraquiz.ui.screen.settings.SettingsDecks
 import one.felsen.auraquiz.ui.screen.settings.SettingsSchedulerScreen
 import one.felsen.auraquiz.ui.screen.settings.SettingsScreen
@@ -109,7 +109,7 @@ fun HomeNavigation(
                         onBack = { onBack() },
                         deckId = key.uuid,
                         onSelectCard = { cardId ->
-                            // Handle card selection
+                            navigate(EditCardScreen(key.uuid, cardId))
                         }, cardRepository = cardRepository, onEditDeckClick = {
                             navigate(EditDeckScreen(key.uuid))
                         }, onSelectCreateCard = {
@@ -118,9 +118,20 @@ fun HomeNavigation(
                 }
 
                 is CreateCardScreen -> NavEntry(key) {
-                    CardEditorScreen(isEditing = false, onBack = { onBack() }, onSave = { type, map -> }, onDelete = {
+                    CardScreen(
+                        onBack = { onBack() },
+                        cardRepository = cardRepository,
+                        deckId = key.deck
+                    )
+                }
 
-                    })
+                is EditCardScreen -> NavEntry(key) {
+                    CardScreen(
+                        onBack = { onBack() },
+                        cardRepository = cardRepository,
+                        deckId = key.deck,
+                        cardId = key.uuid
+                    )
                 }
 
                 else -> throw IllegalArgumentException("Unknown screen: $key")

@@ -8,7 +8,7 @@ class DeckRepository(
 ) {
     suspend fun insertDeck(deck: DeckEntity) = deckDao.insertDeck(deck)
     suspend fun getDeckById(id: Uuid) = deckDao.getDeckById(id)
-    suspend fun updateDeck(document: DeckEntity) = deckDao.updateDeck(document)
+    suspend fun updateDeck(deck: DeckEntity) = deckDao.updateDeck(deck)
     suspend fun updateDeckWithTimestamp(deck: DeckEntity) {
         updateDeck(deck.copy(updatedTimestamp = System.currentTimeMillis()))
     }

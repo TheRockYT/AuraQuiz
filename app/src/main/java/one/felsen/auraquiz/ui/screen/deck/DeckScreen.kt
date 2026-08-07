@@ -7,12 +7,9 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
-import androidx.compose.material3.ToggleFloatingActionButtonDefaults.animateIcon
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -24,7 +21,7 @@ import one.felsen.auraquiz.ui.UiState
 import one.felsen.auraquiz.ui.screen.diolog.ErrorDialog
 import one.felsen.auraquiz.ui.screen.diolog.LoadingDialog
 import one.felsen.auraquiz.ui.screen.settings.SettingsPlane
-import one.felsen.auraquiz.viewmodel.CardViewModel
+import one.felsen.auraquiz.viewmodel.DeckDetailsViewModel
 import kotlin.uuid.Uuid
 
 @Composable
@@ -37,8 +34,8 @@ fun DeckScreen(
     cardRepository: CardRepository
 ) {
 
-    val cardViewModel = viewModel { CardViewModel(cardRepository, deckId) }
-    val uiState by cardViewModel.uiState.collectAsStateWithLifecycle()
+    val deckDetailsViewModel = viewModel { DeckDetailsViewModel(cardRepository, deckId) }
+    val uiState by deckDetailsViewModel.uiState.collectAsStateWithLifecycle()
 
     val listState = rememberLazyListState()
     val fabVisible by remember { derivedStateOf { listState.firstVisibleItemIndex == 0 } }
