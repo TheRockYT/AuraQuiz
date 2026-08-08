@@ -33,9 +33,6 @@ interface CardDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertReviewLog(log: ReviewLogEntity)
 
-    // Get Num Due Cards per Deck
-    // Get Num New Cards per Deck
-
     @Transaction
     @Query("SELECT * FROM cards WHERE deckId = :deckId")
     suspend fun getCardsWithDataForDeck(deckId: Uuid): List<CardWithData>
@@ -73,7 +70,6 @@ interface CardDao {
         val insertResults = insertCardsAllIgnore(cards)
 
         for (i in cards.indices) {
-            // Room returns -1 for any row that was ignored due to primary key conflict
             if (insertResults[i] == -1L) {
                 val card = cards[i]
                 updateCardIfNewer(
@@ -97,7 +93,6 @@ interface CardDao {
         val insertResults = insertCardDataAllIgnore(cardData)
 
         for (i in cardData.indices) {
-            // Room returns -1 for any row that was ignored due to primary key conflict
             if (insertResults[i] == -1L) {
                 val cardDataEntity = cardData[i]
                 updateCardDataIfNewer(
@@ -112,4 +107,33 @@ interface CardDao {
             }
         }
     }
+
+
+    @Transaction
+    @Query("""
+        SELECT c.* FROM cards c
+        INNER JOIN decks d ON c.deckId = d.id
+        INNER JOIN card_data cd ON c.id = cd.id
+        WHERE d.active = 1 AND c.active = 1 AND cd.dueDate < :currentTimestamp
+        ORDER BY cd.dueDate ASC
+        LIMIT 1
+    """)
+    suspend fun getNextDueCard(currentTimestamp: Long): CardWithData?
+
+    @Query("""
+        SELECT COUNT(*) FROM card_data 
+        WHERE creationTimestamp >= :startOfDayTimestamp
+    """)
+    suspend fun getNewCardsStudiedCountSince(startOfDayTimestamp: Long): Int
+
+    @Transaction
+    @Query("""
+        SELECT c.* FROM cards c
+        INNER JOIN decks d ON c.deckId = d.id
+        LEFT JOIN card_data cd ON c.id = cd.id
+        WHERE d.active = 1 AND c.active = 1 AND cd.id IS NULL
+        ORDER BY c.priority DESC, c.creationTimestamp ASC
+        LIMIT 1
+    """)
+    suspend fun getNextNewCard(): CardWithData?
 }

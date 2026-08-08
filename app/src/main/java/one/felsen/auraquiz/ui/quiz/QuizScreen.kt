@@ -1,103 +1,51 @@
 package one.felsen.auraquiz.ui.quiz
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.widthIn
+import android.R.attr.maxHeight
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.delay
-import one.felsen.auraquiz.trivia.AppQuestion
-import one.felsen.auraquiz.ui.theme.AuraQuizTheme
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import one.felsen.auraquiz.data.card.CardData
+import one.felsen.auraquiz.data.card.CardEntity
+import one.felsen.auraquiz.data.card.CardRepository
+import one.felsen.auraquiz.ui.UiState
+import one.felsen.auraquiz.ui.screen.diolog.ErrorDialog
+import one.felsen.auraquiz.ui.screen.diolog.LoadingDialog
+import one.felsen.auraquiz.viewmodel.DeckDetailsViewModel
+import one.felsen.auraquiz.viewmodel.QuizViewModel
 
 @Composable
 fun QuizScreen(
-    question: AppQuestion,
-    modifier: Modifier = Modifier,
+    cardRepository: CardRepository,
     appearance: QuizAppearance = QuizAppearance.Default,
-    onCorrectAnswer: (() -> Unit)? = null,
-    onContinue: (() -> Unit)? = null,
-    showContinueButton: Boolean = true,
-    autoAdvanceOnCorrect: Boolean = false,
-    advanceDelayMillis: Long = 700,
-    onDismiss: (() -> Unit)? = null,
-    dismissButtonLabel: String = "Back to Lock Screen",
-    contentMaxWidth: androidx.compose.ui.unit.Dp = 640.dp
+    onDismiss: (() -> Unit) = {},
+    onLockScreen: Boolean = false
 ) {
-    val choices = remember(question.id) { question.shuffledChoices() }
-    var wrongAnswers by rememberSaveable(question.id) { mutableStateOf(setOf<String>()) }
-    var isSolved by rememberSaveable(question.id) { mutableStateOf(false) }
 
-    LaunchedEffect(question.id) {
-        wrongAnswers = emptySet()
-        isSolved = false
-    }
-
-    LaunchedEffect(isSolved, question.id) {
-        if (isSolved && autoAdvanceOnCorrect && onContinue != null) {
-            delay(advanceDelayMillis)
-            onContinue()
-        }
-    }
+    val deckDetailsViewModel = viewModel { QuizViewModel(cardRepository) }
+    val uiState by deckDetailsViewModel.uiState.collectAsStateWithLifecycle()
 
     val backgroundColor = appearance.backgroundColor ?: MaterialTheme.colorScheme.background
     val scrollState = rememberScrollState()
-    val swipeToDismissEnabled = onDismiss != null
 
     CompositionLocalProvider(LocalQuizAppearance provides appearance) {
         val quizContent: @Composable () -> Unit = {
-            BoxWithConstraints(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .then(
-                        if (swipeToDismissEnabled) {
-                            Modifier.wrapContentHeight()
-                        } else {
-                            Modifier.fillMaxSize()
-                        }
-                    ),
-                contentAlignment = Alignment.TopCenter
-            ) {
                 Column(
                     modifier = Modifier
-                        .widthIn(max = contentMaxWidth)
-                        .fillMaxWidth()
-                        .then(
-                            if (swipeToDismissEnabled) {
-                                Modifier.heightIn(max = maxHeight)
-                            } else {
-                                Modifier.fillMaxSize()
-                            }
-                        )
+                        .fillMaxSize()
                         .verticalScroll(scrollState)
                         .padding(WindowInsets.safeDrawing.asPaddingValues())
                         .padding(
@@ -106,67 +54,73 @@ fun QuizScreen(
                         ),
                     verticalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
-                        QuizQuestionCard(question = question)
-
-                        QuizFeedbackBanner(
-                            isSolved = isSolved,
-                            hasWrongAttempt = wrongAnswers.isNotEmpty() && !isSolved
-                        )
-
-                        QuizAnswerList(
-                            choices = choices,
-                            correctAnswer = question.correctAnswer,
-                            wrongAnswers = wrongAnswers,
-                            isSolved = isSolved,
-                            onAnswerSelected = { selected ->
-                                if (isSolved || selected in wrongAnswers) return@QuizAnswerList
-
-                                if (selected == question.correctAnswer) {
-                                    isSolved = true
-                                    onCorrectAnswer?.invoke()
-                                } else {
-                                    wrongAnswers = wrongAnswers + selected
-                                }
-                            }
-                        )
-
-                        if (showContinueButton && isSolved && onContinue != null && !autoAdvanceOnCorrect) {
-                            Button(
-                                onClick = onContinue,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text("Next Question")
-                            }
+                    when(val state = uiState) {
+                        is UiState.Error -> {
+                            ErrorDialog(
+                                message = state.message, onDismissRequest = { onDismiss() }
+                            )
                         }
+                        is UiState.Loading -> {
+                            LoadingDialog()
+                        }
+                        is UiState.Success -> {
+                            val card = state.data
+                            QuizQuestionCard(card.title)
 
-                        if (onDismiss != null) {
-                            OutlinedButton(
-                                onClick = onDismiss,
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = if (appearance.useGlassStyle) {
-                                    ButtonDefaults.outlinedButtonColors(
-                                        contentColor = appearance.contentColor
+                            Column(
+                                modifier = Modifier.fillMaxSize().weight(1f),
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+
+                                if (card.data is CardData.Flashcard) {
+                                    QuizAnswerOption(
+                                        front = card.data.front,
+                                        back = card.data.back,
                                     )
                                 } else {
-                                    ButtonDefaults.outlinedButtonColors()
-                                },
-                                border = if (appearance.useGlassStyle) {
-                                    BorderStroke(1.dp, appearance.answerBorderColor)
-                                } else {
-                                    ButtonDefaults.outlinedButtonBorder
+                                    QuizAnswerOption(
+                                        front = "Currently unsupported card type",
+                                        back = "Please check back later",
+                                    )
                                 }
+                            }
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceEvenly,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(dismissButtonLabel)
+                                RatingButton(
+                                    text = "Again",
+                                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                                )
+                                RatingButton(
+                                    text = "Hard",
+                                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                                )
+                                RatingButton(
+                                    text = "Middle",
+                                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                                )
+                                RatingButton(
+                                    text = "Good",
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
                             }
                         }
+                    }
+
                 }
-            }
         }
 
-        if (swipeToDismissEnabled) {
+        if (onLockScreen) {
             SwipeToDismissContainer(
                 onDismiss = onDismiss,
-                modifier = modifier.fillMaxSize(),
                 enabled = true,
                 backgroundTapToDismiss = true,
                 scrimColor = Color(0x66000000),
@@ -174,11 +128,11 @@ fun QuizScreen(
             )
         } else {
             Surface(
-                modifier = modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
                 color = backgroundColor
             ) {
                 SwipeToDismissContainer(
-                    onDismiss = { onDismiss?.invoke() },
+                    onDismiss = onDismiss,
                     enabled = false,
                     content = quizContent
                 )
@@ -187,26 +141,26 @@ fun QuizScreen(
     }
 }
 
-@PreviewScreenSizes
-@Preview(showBackground = true)
 @Composable
-private fun QuizScreenPreview() {
-    AuraQuizTheme {
-        QuizScreen(
-            question = AppQuestion(
-                id = 1,
-                category = "Geography",
-                difficulty = "hard",
-                type = "multiple",
-                question = "What is the tallest mountain in Canada?",
-                correctAnswer = "Mount Logan",
-                incorrectAnswers = listOf(
-                    "Mont Tremblant",
-                    "Whistler Mountain",
-                    "Blue Mountain"
-                )
-            ),
-            onContinue = {}
+fun RatingButton(
+    text: String,
+    containerColor: Color,
+    contentColor: Color,
+    onClick: () -> Unit = {}
+) {
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = containerColor,
+            contentColor = contentColor
+        ),
+        // Allows buttons to scale nicely if screen size is tight
+        modifier = Modifier.padding(horizontal = 4.dp),
+        shape = MaterialTheme.shapes.small
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelLarge
         )
     }
 }

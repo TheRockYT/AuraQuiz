@@ -25,12 +25,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import one.felsen.auraquiz.data.AppDatabase
+import one.felsen.auraquiz.data.card.CardData
+import one.felsen.auraquiz.data.card.CardEntity
+import one.felsen.auraquiz.data.card.CardRepository
 import one.felsen.auraquiz.trivia.TriviaRepository
 import one.felsen.auraquiz.ui.quiz.QuizAppearance
 import one.felsen.auraquiz.ui.quiz.QuizScreen
 import one.felsen.auraquiz.ui.theme.AuraQuizTheme
+import kotlin.uuid.Uuid
 
 class LockScreenActivity : ComponentActivity() {
 
@@ -114,6 +120,10 @@ class LockScreenActivity : ComponentActivity() {
         )
 
         setContent {
+            val context = LocalContext.current.applicationContext
+            val database = AppDatabase.getInstance(context)
+            val cardRepository = remember { CardRepository(database.cardDao()) }
+
             AuraQuizTheme {
                 var currentQuestion by remember {
                     mutableStateOf(TriviaRepository.getNextRandomQuestion(this@LockScreenActivity))
@@ -127,19 +137,10 @@ class LockScreenActivity : ComponentActivity() {
                 ) {
                     currentQuestion?.let { question ->
                         QuizScreen(
-                            question = question,
-                            modifier = Modifier.fillMaxSize(),
                             appearance = QuizAppearance.LockScreen,
-                            onContinue = {
-                                currentQuestion = TriviaRepository.getNextRandomQuestion(
-                                    this@LockScreenActivity
-                                )
-                            },
-                            autoAdvanceOnCorrect = true,
-                            showContinueButton = false,
+                            onLockScreen = true,
                             onDismiss = { finish() },
-                            dismissButtonLabel = "Back to Lock Screen",
-                            contentMaxWidth = 560.dp
+                            cardRepository = cardRepository
                         )
                     } ?: Text(
                         text = "No questions available",

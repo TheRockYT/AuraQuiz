@@ -2,6 +2,9 @@ package one.felsen.auraquiz.data.card
 
 import kotlinx.coroutines.flow.Flow
 import one.felsen.auraquiz.data.deck.DeckEntity
+import java.time.ZoneId
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
 class CardRepository(
@@ -26,5 +29,28 @@ class CardRepository(
     suspend fun insertCardDataAllIgnore(cardData: List<CardDataEntity>): List<Long> = cardDao.insertCardDataAllIgnore(cardData)
     suspend fun upsertAllCardData(cardData: List<CardDataEntity>): List<Long> = cardDao.upsertAllCardData(cardData)
     suspend fun upsertAllCardDataIfNewer(cardData: List<CardDataEntity>) = cardDao.upsertAllCardDataIfNewer(cardData)
+
+
+    suspend fun getNextCardToStudy(): CardWithData? {
+        val now = System.currentTimeMillis()
+
+        // Try to get a due card from an active deck first
+        val dueCard = cardDao.getNextDueCard(currentTimestamp = now)
+        if (dueCard != null) {
+            return dueCard
+        }
+
+        // If no due cards, check if we can add a new card
+        val startOfDay = now - 1.days.inWholeMilliseconds
+        val newlyStudiedToday = cardDao.getNewCardsStudiedCountSince(startOfDay)
+
+        if (newlyStudiedToday < 30) {
+            // We are under the limit, fetch a fresh card
+            return cardDao.getNextNewCard()
+        }
+
+        // No due cards and daily limit reached. The study session is done for now!
+        return null
+    }
 
 }

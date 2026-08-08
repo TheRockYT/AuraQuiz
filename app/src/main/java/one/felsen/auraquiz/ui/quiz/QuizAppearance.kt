@@ -13,7 +13,7 @@ data class QuizAppearance(
     val answerColor: Color = Color.Unspecified,
     val answerBorderColor: Color = Color.Unspecified,
     val horizontalPadding: Dp = 20.dp,
-    val verticalPadding: Dp = 24.dp,
+    val verticalPadding: Dp = 30.dp,
 ) {
     companion object {
         val Default = QuizAppearance()

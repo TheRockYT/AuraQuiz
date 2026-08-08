@@ -12,9 +12,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import one.felsen.auraquiz.data.card.CardData
+import one.felsen.auraquiz.data.card.CardEntity
+import one.felsen.auraquiz.data.card.CardRepository
+import one.felsen.auraquiz.ui.quiz.QuizScreen
+import kotlin.uuid.Uuid
 
 @Composable
-fun HomeScreen(onOpenSettings: () -> Unit) {
+fun HomeScreen(onOpenSettings: () -> Unit, cardRepository: CardRepository) {
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -37,9 +42,9 @@ fun HomeScreen(onOpenSettings: () -> Unit) {
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            Text("Welcome to AuraQuiz")
-
-
+            QuizScreen(
+                cardRepository = cardRepository
+            )
         }
     }
 }

@@ -1,5 +1,6 @@
 package one.felsen.auraquiz.ui.quiz
 
+import android.R.attr.category
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,18 +12,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import one.felsen.auraquiz.trivia.AppQuestion
-import one.felsen.auraquiz.ui.theme.AuraQuizTheme
 
 @Composable
 fun QuizQuestionCard(
-    question: String,
-    category: String,
-    difficulty: String,
-    modifier: Modifier = Modifier
+    title: String,
 ) {
     val appearance = LocalQuizAppearance.current
     val containerColor = if (appearance.useGlassStyle) {
@@ -37,7 +31,7 @@ fun QuizQuestionCard(
     }
 
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = containerColor
@@ -52,13 +46,10 @@ fun QuizQuestionCard(
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            QuizMetadataChips(
-                category = category,
-                difficulty = difficulty
-            )
+            QuizMetadataChips(title)
 
             Text(
-                text = question,
+                text = "Aura Quiz",
                 style = MaterialTheme.typography.headlineMedium,
                 color = textColor
             )
@@ -66,27 +57,3 @@ fun QuizQuestionCard(
     }
 }
 
-@Preview
-@Composable
-private fun QuizQuestionCardPreview() {
-    AuraQuizTheme {
-        QuizQuestionCard(
-            question = "What is the tallest mountain in Canada?",
-            category = "Geography",
-            difficulty = "hard"
-        )
-    }
-}
-
-@Composable
-fun QuizQuestionCard(
-    question: AppQuestion,
-    modifier: Modifier = Modifier
-) {
-    QuizQuestionCard(
-        question = question.question,
-        category = question.category,
-        difficulty = question.difficulty,
-        modifier = modifier
-    )
-}

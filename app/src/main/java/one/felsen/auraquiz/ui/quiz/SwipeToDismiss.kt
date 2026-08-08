@@ -42,7 +42,6 @@ import kotlin.math.sqrt
 @Composable
 fun SwipeToDismissContainer(
     onDismiss: () -> Unit,
-    modifier: Modifier = Modifier,
     enabled: Boolean = true,
     backgroundTapToDismiss: Boolean = false,
     scrimColor: Color = Color.Transparent,
@@ -60,7 +59,7 @@ fun SwipeToDismissContainer(
     val scope = rememberCoroutineScope()
     var isDragging by remember { mutableStateOf(false) }
 
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize()) {
         if (backgroundTapToDismiss) {
             Box(
                 modifier = Modifier
@@ -77,7 +76,7 @@ fun SwipeToDismissContainer(
         Box(
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .fillMaxWidth()
+                .fillMaxSize()
                 .wrapContentHeight()
                 .pointerInput(enabled, thresholdPx, touchSlopPx) {
                     if (!enabled) return@pointerInput
@@ -162,7 +161,6 @@ fun SwipeToDismissContainer(
 
 @Composable
 fun SwipeDismissHint(
-    modifier: Modifier = Modifier,
     textColor: Color = Color.Unspecified
 ) {
     val appearance = LocalQuizAppearance.current
@@ -175,7 +173,6 @@ fun SwipeDismissHint(
     }
 
     Surface(
-        modifier = modifier,
         shape = MaterialTheme.shapes.medium,
         color = if (appearance.useGlassStyle) {
             Color.Black.copy(alpha = 0.45f)
