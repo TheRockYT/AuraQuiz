@@ -1,6 +1,7 @@
 package one.felsen.auraquiz.ui.quiz
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -14,11 +15,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.felsen.auraquiz.data.card.CardData
 import one.felsen.auraquiz.data.card.CardRepository
+import one.felsen.auraquiz.settings.SettingsRepository
 import one.felsen.auraquiz.ui.UiState
 import one.felsen.auraquiz.ui.screen.diolog.ErrorDialog
 import one.felsen.auraquiz.ui.screen.diolog.LoadingDialog
@@ -28,12 +31,13 @@ import one.felsen.fsrskt.fsrs6.FsrsRating
 @Composable
 fun QuizScreen(
     cardRepository: CardRepository,
+    settingsRepository: SettingsRepository,
     appearance: QuizAppearance = QuizAppearance.Default,
     onDismiss: (() -> Unit) = {},
     onLockScreen: Boolean = false
 ) {
 
-    val deckDetailsViewModel = viewModel { QuizViewModel(cardRepository) }
+    val deckDetailsViewModel = viewModel { QuizViewModel(cardRepository, settingsRepository) }
     val uiState by deckDetailsViewModel.uiState.collectAsStateWithLifecycle()
 
     val backgroundColor = appearance.backgroundColor ?: MaterialTheme.colorScheme.background
@@ -54,15 +58,24 @@ fun QuizScreen(
             ) {
                 when (val state = uiState) {
                     is UiState.Error -> {
-                        Text(
-                            text = state.message,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.error
-                        )
+                        Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxSize()) {
+                            Text(
+                                text = state.message,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.error,
+                                textAlign = TextAlign.Center,
+                            )
+                        }
                     }
 
                     is UiState.Loading -> {
-                        LoadingDialog()
+                        Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxSize()) {
+                            Text(
+                                text = "Please wait...",
+                                style = MaterialTheme.typography.bodyLarge,
+                                textAlign = TextAlign.Center,
+                            )
+                        }
                     }
 
                     is UiState.Success -> {

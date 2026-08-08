@@ -44,66 +44,67 @@ fun QuizAnswerOption(
         MaterialTheme.colorScheme.outlineVariant
     }
 
-    // State to track if the card is flipped
-    var isFlipped by remember { mutableStateOf(false) }
-    LaunchedEffect(front, back) {
-        isFlipped = false
-    }
+    key(front, back) {
 
-    // Animate the rotation angle from 0 to 180 degrees
-    val rotation by animateFloatAsState(
-        targetValue = if (isFlipped) 180f else 0f,
-        animationSpec = tween(
-            durationMillis = 500,
-            easing = FastOutSlowInEasing
-        ),
-        label = "flashcard_flip"
-    )
+        // State to track if the card is flipped
+        var isFlipped by remember { mutableStateOf(false) }
 
-    // Determine if we are looking at the front or back (swaps at 90 degrees)
-    val isFront = rotation <= 90f
+        // Animate the rotation angle from 0 to 180 degrees
+        val rotation by animateFloatAsState(
+            targetValue = if (isFlipped) 180f else 0f,
+            animationSpec = tween(
+                durationMillis = 500,
+                easing = FastOutSlowInEasing
+            ),
+            label = "flashcard_flip"
+        )
 
-    Card(
-        onClick = { isFlipped = !isFlipped },
-        modifier = Modifier
-            .fillMaxSize()
-            .graphicsLayer {
-                // Apply the Y-axis rotation
-                rotationY = rotation
-                // Set camera distance to give a 3D perspective/depth effect
-                cameraDistance = 12f * density
-            },
-        colors = CardDefaults.cardColors(
-            containerColor = containerColor,
-            contentColor = contentColor,
-            disabledContainerColor = containerColor,
-            disabledContentColor = contentColor
-        ),
-        border = BorderStroke(1.5.dp, borderColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Row(
+
+        // Determine if we are looking at the front or back (swaps at 90 degrees)
+        val isFront = rotation <= 90f
+
+        Card(
+            onClick = { isFlipped = !isFlipped },
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 16.dp, vertical = 14.dp)
                 .graphicsLayer {
-                    // Prevent the back text from being completely mirrored
-                    if (!isFront) {
-                        rotationY = 180f
-                    }
+                    // Apply the Y-axis rotation
+                    rotationY = rotation
+                    // Set camera distance to give a 3D perspective/depth effect
+                    cameraDistance = 12f * density
                 },
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+            colors = CardDefaults.cardColors(
+                containerColor = containerColor,
+                contentColor = contentColor,
+                disabledContainerColor = containerColor,
+                disabledContentColor = contentColor
+            ),
+            border = BorderStroke(1.5.dp, borderColor),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {
-            Text(
-                // Swap the text depending on which side is showing
-                text = if (isFront) front else back,
-                style = MaterialTheme.typography.bodyLarge,
-                maxLines = 4,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f),
-                textAlign = TextAlign.Center
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp, vertical = 14.dp)
+                    .graphicsLayer {
+                        // Prevent the back text from being completely mirrored
+                        if (!isFront) {
+                            rotationY = 180f
+                        }
+                    },
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    // Swap the text depending on which side is showing
+                    text = if (isFront) front else back,
+                    style = MaterialTheme.typography.bodyLarge,
+                    maxLines = 4,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 }

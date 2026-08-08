@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.graphics.Color as AndroidColor
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -29,14 +28,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import one.felsen.auraquiz.data.AppDatabase
-import one.felsen.auraquiz.data.card.CardData
-import one.felsen.auraquiz.data.card.CardEntity
 import one.felsen.auraquiz.data.card.CardRepository
+import one.felsen.auraquiz.settings.SettingsRepository
 import one.felsen.auraquiz.trivia.TriviaRepository
 import one.felsen.auraquiz.ui.quiz.QuizAppearance
 import one.felsen.auraquiz.ui.quiz.QuizScreen
 import one.felsen.auraquiz.ui.theme.AuraQuizTheme
-import kotlin.uuid.Uuid
+import android.graphics.Color as AndroidColor
 
 class LockScreenActivity : ComponentActivity() {
 
@@ -123,6 +121,7 @@ class LockScreenActivity : ComponentActivity() {
             val context = LocalContext.current.applicationContext
             val database = AppDatabase.getInstance(context)
             val cardRepository = remember { CardRepository(database.cardDao()) }
+            val settingsRepository = remember { SettingsRepository(context) }
 
             AuraQuizTheme {
                 var currentQuestion by remember {
@@ -140,7 +139,8 @@ class LockScreenActivity : ComponentActivity() {
                             appearance = QuizAppearance.LockScreen,
                             onLockScreen = true,
                             onDismiss = { finish() },
-                            cardRepository = cardRepository
+                            cardRepository = cardRepository,
+                            settingsRepository = settingsRepository
                         )
                     } ?: Text(
                         text = "No questions available",

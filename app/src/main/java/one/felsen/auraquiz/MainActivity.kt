@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.felsen.auraquiz.data.AppDatabase
@@ -26,8 +27,10 @@ class MainActivity : ComponentActivity() {
 
             val database = AppDatabase.getInstance(context)
 
+            val settingsRepository = remember { SettingsRepository(context) }
+
             val settingsViewModel =
-                viewModel { SettingsViewModel(SettingsRepository(context)) }
+                viewModel { SettingsViewModel(settingsRepository) }
 
             val theme by settingsViewModel.appTheme.collectAsState(AppTheme.SYSTEM)
             val dynamicColor by settingsViewModel.dynamicColor.collectAsState(false)
@@ -39,7 +42,7 @@ class MainActivity : ComponentActivity() {
             }
 
             AuraQuizTheme(darkTheme = darkTheme, dynamicColor = dynamicColor) {
-                HomeNavigation(settingsViewModel = settingsViewModel, database = database)
+                HomeNavigation(settingsViewModel = settingsViewModel, database = database, settingsRepository = settingsRepository)
             }
         }
     }

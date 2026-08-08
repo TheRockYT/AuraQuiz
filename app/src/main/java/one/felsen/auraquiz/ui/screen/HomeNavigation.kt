@@ -9,6 +9,7 @@ import androidx.navigation3.ui.NavDisplay
 import one.felsen.auraquiz.data.AppDatabase
 import one.felsen.auraquiz.data.card.CardRepository
 import one.felsen.auraquiz.data.deck.DeckRepository
+import one.felsen.auraquiz.settings.SettingsRepository
 import one.felsen.auraquiz.settings.SettingsViewModel
 import one.felsen.auraquiz.ui.screen.deck.DeckExportScreen
 import one.felsen.auraquiz.ui.screen.deck.DecksImportScreen
@@ -23,7 +24,7 @@ import one.felsen.auraquiz.ui.screen.settings.SettingsSynchronization
 
 @Composable
 fun HomeNavigation(
-    settingsViewModel: SettingsViewModel, database: AppDatabase
+    settingsViewModel: SettingsViewModel, database: AppDatabase, settingsRepository: SettingsRepository
 ) {
 
     val deckRepository = remember { DeckRepository(database.deckDao()) }
@@ -50,7 +51,7 @@ fun HomeNavigation(
         ), entryProvider = { key ->
             when (key) {
                 is Quiz -> NavEntry(key) {
-                    HomeScreen(onOpenSettings = { navigate(Settings) }, cardRepository = cardRepository)
+                    HomeScreen(onOpenSettings = { navigate(Settings) }, cardRepository = cardRepository, settingsRepository = settingsRepository)
                 }
 
                 is Settings -> NavEntry(key) {

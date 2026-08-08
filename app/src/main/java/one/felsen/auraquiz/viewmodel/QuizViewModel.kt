@@ -2,13 +2,18 @@ package one.felsen.auraquiz.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import one.felsen.auraquiz.data.card.CardDataEntity
 import one.felsen.auraquiz.data.card.CardRepository
 import one.felsen.auraquiz.data.card.CardWithData
+import one.felsen.auraquiz.settings.SettingsRepository
 import one.felsen.auraquiz.ui.UiState
 import one.felsen.fsrskt.fsrs6.FsrsCalculator
 import one.felsen.fsrskt.fsrs6.FsrsRating
@@ -17,31 +22,48 @@ import one.felsen.fsrskt.helper.DateTimeHelper.elapsedDays
 import one.felsen.fsrskt.helper.DateTimeHelper.isSameDay
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 
-class QuizViewModel(private val cardRepository: CardRepository) :
+class QuizViewModel(private val cardRepository: CardRepository, private val settingsRepository: SettingsRepository) :
     ViewModel() {
 
     private val _uiState = MutableStateFlow<UiState<CardWithData>>(UiState.Loading)
     val uiState: StateFlow<UiState<CardWithData>> = _uiState.asStateFlow()
 
+    private var updateJob: Job? = null
 
     init {
         nextCard()
+        startUpdate()
+    }
+
+    private fun startUpdate(fast: Boolean = false) {
+        updateJob?.cancel()
+        updateJob = viewModelScope.launch {
+            if (fast) {
+                delay(5.seconds)
+            } else {
+                delay(20.seconds)
+            }
+            nextCard()
+        }
     }
 
     fun nextCard() {
-        viewModelScope.launch {
-            _uiState.value = UiState.Loading
+        viewModelScope.launch(Dispatchers.IO) {
             try {
-                val nextCard = cardRepository.getNextCardToStudy()
+                val nextCard = cardRepository.getNextCardToStudy(settingsMax = settingsRepository.getMaxNew().first())
                 if (nextCard != null) {
                     _uiState.value = UiState.Success(nextCard)
+                    startUpdate(false)
                 } else {
                     _uiState.value = UiState.Error("No cards available for study.")
+                    startUpdate(true)
                 }
             } catch (e: Exception) {
                 _uiState.value = UiState.Error(e.localizedMessage ?: "Unknown error occurred")
+                startUpdate(true)
             }
         }
     }
@@ -57,8 +79,6 @@ class QuizViewModel(private val cardRepository: CardRepository) :
 
             val data = stateValue.data
             val cardData = data.cardData
-
-            _uiState.value = UiState.Loading
 
             val now = Clock.System.now()
             val lastReview = Instant.fromEpochMilliseconds(cardData?.lastReview ?: now.toEpochMilliseconds())
@@ -88,9 +108,15 @@ class QuizViewModel(private val cardRepository: CardRepository) :
                     updatedTimestamp = now.toEpochMilliseconds()
                 )
 
-            cardRepository.upsertCardData(
-                cardDataEntity = newCardData
-            )
+            try {
+
+                cardRepository.upsertCardData(
+                    cardDataEntity = newCardData
+                )
+            } catch (e: Exception) {
+                _uiState.value = UiState.Error(e.localizedMessage ?: "Unknown error occurred")
+                return@launch
+            }
 
             nextCard()
         }

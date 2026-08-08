@@ -1,10 +1,11 @@
 package one.felsen.auraquiz.data.card
 
+import android.os.Build
 import kotlinx.coroutines.flow.Flow
-import one.felsen.auraquiz.data.deck.DeckEntity
+import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
 import kotlin.time.Duration.Companion.days
-import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
 class CardRepository(
@@ -20,18 +21,20 @@ class CardRepository(
     suspend fun updateCardWithTimestamp(card: CardEntity) {
         updateCard(card.copy(updatedTimestamp = System.currentTimeMillis()))
     }
+
     suspend fun getCardsWithDataForDeck(deckId: Uuid) = cardDao.getCardsWithDataForDeck(deckId)
 
     suspend fun insertCardsAllIgnore(cards: List<CardEntity>): List<Long> = cardDao.insertCardsAllIgnore(cards)
     suspend fun upsertAllCards(cards: List<CardEntity>): List<Long> = cardDao.upsertAllCards(cards)
     suspend fun upsertAllCardsIfNewer(cards: List<CardEntity>) = cardDao.upsertAllCardsIfNewer(cards)
 
-    suspend fun insertCardDataAllIgnore(cardData: List<CardDataEntity>): List<Long> = cardDao.insertCardDataAllIgnore(cardData)
+    suspend fun insertCardDataAllIgnore(cardData: List<CardDataEntity>): List<Long> =
+        cardDao.insertCardDataAllIgnore(cardData)
+
     suspend fun upsertAllCardData(cardData: List<CardDataEntity>): List<Long> = cardDao.upsertAllCardData(cardData)
     suspend fun upsertAllCardDataIfNewer(cardData: List<CardDataEntity>) = cardDao.upsertAllCardDataIfNewer(cardData)
 
-
-    suspend fun getNextCardToStudy(): CardWithData? {
+    suspend fun getNextCardToStudy(settingsMax: Int): CardWithData? {
         val now = System.currentTimeMillis()
 
         // Try to get a due card from an active deck first
@@ -40,17 +43,31 @@ class CardRepository(
             return dueCard
         }
 
-        // If no due cards, check if we can add a new card
-        val startOfDay = now - 1.days.inWholeMilliseconds
-        val newlyStudiedToday = cardDao.getNewCardsStudiedCountSince(startOfDay)
-
-        if (newlyStudiedToday < 30) {
-            // We are under the limit, fetch a fresh card
-            return cardDao.getNextNewCard()
+        val fourAmTimestamp: Long = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            LocalDate.now()
+                .atTime(LocalTime.of(4, 0))
+                .atZone(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli()
+        } else {
+            now.minus(1.days.inWholeMilliseconds)
         }
 
-        // No due cards and daily limit reached. The study session is done for now!
-        return null
+        val candidates = mutableListOf<CardWithData>()
+
+        val decks = cardDao.getAllDecks()
+        for ((id) in decks) {
+            val newlyStudiedToday = cardDao.getNewCardsStudiedCountSinceOnDeck(fourAmTimestamp, id)
+
+            if (newlyStudiedToday < settingsMax) {
+                // We are under the limit, fetch a fresh card
+                cardDao.getNextNewCard(id)?.let { candidates.add(it) }
+            }
+        }
+
+        candidates.sortBy { it.card.priority }
+
+        return candidates.firstOrNull()
     }
 
     suspend fun upsertCardData(cardDataEntity: CardDataEntity) = cardDao.upsertCardData(cardDataEntity)
