@@ -53,4 +53,6 @@ class CardRepository(
         return null
     }
 
+    suspend fun upsertCardData(cardDataEntity: CardDataEntity) = cardDao.upsertCardData(cardDataEntity)
+
 }

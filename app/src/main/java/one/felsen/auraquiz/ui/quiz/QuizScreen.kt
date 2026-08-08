@@ -1,6 +1,5 @@
 package one.felsen.auraquiz.ui.quiz
 
-import android.R.attr.maxHeight
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -19,13 +18,12 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.felsen.auraquiz.data.card.CardData
-import one.felsen.auraquiz.data.card.CardEntity
 import one.felsen.auraquiz.data.card.CardRepository
 import one.felsen.auraquiz.ui.UiState
 import one.felsen.auraquiz.ui.screen.diolog.ErrorDialog
 import one.felsen.auraquiz.ui.screen.diolog.LoadingDialog
-import one.felsen.auraquiz.viewmodel.DeckDetailsViewModel
 import one.felsen.auraquiz.viewmodel.QuizViewModel
+import one.felsen.fsrskt.fsrs6.FsrsRating
 
 @Composable
 fun QuizScreen(
@@ -43,79 +41,93 @@ fun QuizScreen(
 
     CompositionLocalProvider(LocalQuizAppearance provides appearance) {
         val quizContent: @Composable () -> Unit = {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(scrollState)
-                        .padding(WindowInsets.safeDrawing.asPaddingValues())
-                        .padding(
-                            horizontal = appearance.horizontalPadding,
-                            vertical = appearance.verticalPadding
-                        ),
-                    verticalArrangement = Arrangement.spacedBy(20.dp)
-                ) {
-                    when(val state = uiState) {
-                        is UiState.Error -> {
-                            ErrorDialog(
-                                message = state.message, onDismissRequest = { onDismiss() }
-                            )
-                        }
-                        is UiState.Loading -> {
-                            LoadingDialog()
-                        }
-                        is UiState.Success -> {
-                            val card = state.data
-                            QuizQuestionCard(card.title)
-
-                            Column(
-                                modifier = Modifier.fillMaxSize().weight(1f),
-                                verticalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-
-                                if (card.data is CardData.Flashcard) {
-                                    QuizAnswerOption(
-                                        front = card.data.front,
-                                        back = card.data.back,
-                                    )
-                                } else {
-                                    QuizAnswerOption(
-                                        front = "Currently unsupported card type",
-                                        back = "Please check back later",
-                                    )
-                                }
-                            }
-
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceEvenly,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                RatingButton(
-                                    text = "Again",
-                                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                                    contentColor = MaterialTheme.colorScheme.onErrorContainer
-                                )
-                                RatingButton(
-                                    text = "Hard",
-                                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer
-                                )
-                                RatingButton(
-                                    text = "Middle",
-                                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                                )
-                                RatingButton(
-                                    text = "Good",
-                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
-                            }
-                        }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .padding(WindowInsets.safeDrawing.asPaddingValues())
+                    .padding(
+                        horizontal = appearance.horizontalPadding,
+                        vertical = appearance.verticalPadding
+                    ),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                when (val state = uiState) {
+                    is UiState.Error -> {
+                        Text(
+                            text = state.message,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.error
+                        )
                     }
 
+                    is UiState.Loading -> {
+                        LoadingDialog()
+                    }
+
+                    is UiState.Success -> {
+                        val cardWithData = state.data
+                        QuizQuestionCard(cardWithData.card.title)
+
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+
+                            if (cardWithData.card.data is CardData.Flashcard) {
+                                QuizAnswerOption(
+                                    front = cardWithData.card.data.front,
+                                    back = cardWithData.card.data.back,
+                                )
+                            } else {
+                                QuizAnswerOption(
+                                    front = "Currently unsupported card type",
+                                    back = "Please check back later",
+                                )
+                            }
+                        }
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 8.dp), // Small padding on the edges of the screen
+                            horizontalArrangement = Arrangement.spacedBy(8.dp), // Even gaps between buttons
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RatingButton(
+                                text = "Again",
+                                modifier = Modifier.weight(1f), // Takes up exactly 25% of the space
+                                containerColor = MaterialTheme.colorScheme.errorContainer,
+                                contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                                onClick = { deckDetailsViewModel.rateCard(FsrsRating.AGAIN) }
+                            )
+                            RatingButton(
+                                text = "Hard",
+                                modifier = Modifier.weight(1f),
+                                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                                onClick = { deckDetailsViewModel.rateCard(FsrsRating.HARD) }
+                            )
+                            RatingButton(
+                                text = "Good",
+                                modifier = Modifier.weight(1f),
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                onClick = { deckDetailsViewModel.rateCard(FsrsRating.GOOD) }
+                            )
+                            RatingButton(
+                                text = "Easy",
+                                modifier = Modifier.weight(1f),
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                onClick = { deckDetailsViewModel.rateCard(FsrsRating.EASY) }
+                            )
+                        }
+                    }
                 }
+            }
         }
 
         if (onLockScreen) {
@@ -146,21 +158,23 @@ fun RatingButton(
     text: String,
     containerColor: Color,
     contentColor: Color,
+    modifier: Modifier = Modifier, // Added modifier parameter
     onClick: () -> Unit = {}
 ) {
     Button(
         onClick = onClick,
+        modifier = modifier,
+        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = containerColor,
             contentColor = contentColor
-        ),
-        // Allows buttons to scale nicely if screen size is tight
-        modifier = Modifier.padding(horizontal = 4.dp),
-        shape = MaterialTheme.shapes.small
+        )
     ) {
         Text(
             text = text,
-            style = MaterialTheme.typography.labelLarge
+            style = MaterialTheme.typography.labelLarge,
+            maxLines = 1,      // Prevents text from stacking vertically
+            softWrap = false   // Disables wrapping entirely
         )
     }
 }

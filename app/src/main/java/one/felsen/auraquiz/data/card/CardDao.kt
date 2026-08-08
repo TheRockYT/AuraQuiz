@@ -2,7 +2,6 @@ package one.felsen.auraquiz.data.card
 
 import androidx.room3.*
 import kotlinx.coroutines.flow.Flow
-import one.felsen.auraquiz.data.deck.DeckEntity
 import kotlin.uuid.Uuid
 
 @Dao
@@ -136,4 +135,7 @@ interface CardDao {
         LIMIT 1
     """)
     suspend fun getNextNewCard(): CardWithData?
+
+    @Upsert
+    suspend fun upsertCardData(cardDataEntity: CardDataEntity)
 }

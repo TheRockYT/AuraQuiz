@@ -46,6 +46,9 @@ fun QuizAnswerOption(
 
     // State to track if the card is flipped
     var isFlipped by remember { mutableStateOf(false) }
+    LaunchedEffect(front, back) {
+        isFlipped = false
+    }
 
     // Animate the rotation angle from 0 to 180 degrees
     val rotation by animateFloatAsState(
