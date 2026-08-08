@@ -8,9 +8,9 @@ import kotlin.uuid.Uuid
 data class DeckEntity(
     @PrimaryKey
     val id: Uuid = Uuid.random(),
-    val name: String,
-    val description: String,
-    val authors: String,
+    val name: String = "",
+    val description: String = "",
+    val authors: String = "",
     val active: Boolean = true,
     val creationTimestamp: Long = System.currentTimeMillis(),
     val updatedTimestamp: Long = System.currentTimeMillis()

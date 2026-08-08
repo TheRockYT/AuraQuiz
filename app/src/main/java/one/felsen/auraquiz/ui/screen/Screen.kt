@@ -24,6 +24,8 @@ object SettingsSchedulerScreen : Screen
 
 @Serializable
 object DeckCreateScreen : Screen
+@Serializable
+object DeckExportScreen : Screen
 
 data class EditDeckScreen(val uuid: Uuid) : Screen
 

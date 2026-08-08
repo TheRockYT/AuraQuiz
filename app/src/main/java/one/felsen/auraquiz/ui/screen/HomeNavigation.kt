@@ -10,6 +10,8 @@ import one.felsen.auraquiz.data.AppDatabase
 import one.felsen.auraquiz.data.card.CardRepository
 import one.felsen.auraquiz.data.deck.DeckRepository
 import one.felsen.auraquiz.settings.SettingsViewModel
+import one.felsen.auraquiz.ui.screen.deck.DeckExportScreen
+import one.felsen.auraquiz.ui.screen.deck.DecksImportScreen
 import one.felsen.auraquiz.ui.screen.deck.DeckScreen
 import one.felsen.auraquiz.ui.screen.deck.DeckUpsertScreen
 import one.felsen.auraquiz.ui.screen.deck.card.CardScreen
@@ -68,6 +70,7 @@ fun HomeNavigation(
                         onBack = { onBack() },
                         onSelectImport = { navigate(DeckImportScreen(it)) },
                         onSelectCreate = { navigate(DeckCreateScreen) },
+                        onSelectExport = { navigate(DeckExportScreen) },
                         deckRepository = deckRepository,
                         onSelectDeck = {
                             navigate(DeckOverviewScreen(it))
@@ -88,6 +91,14 @@ fun HomeNavigation(
                         onDelete = { onBack() })
                 }
 
+                is DeckExportScreen -> NavEntry(key) {
+                    DeckExportScreen(
+                        onBack = { onBack() },
+                        deckRepository = deckRepository,
+                        cardRepository = cardRepository
+                    )
+                }
+
                 is EditDeckScreen -> NavEntry(key) {
                     DeckUpsertScreen(
                         uuid = key.uuid,
@@ -101,7 +112,12 @@ fun HomeNavigation(
                 }
 
                 is DeckImportScreen -> NavEntry(key) {
-
+                    DecksImportScreen(
+                        onBack = { onBack()},
+                        uri = key.url,
+                        deckRepository = deckRepository,
+                        cardRepository = cardRepository
+                    )
                 }
 
                 is DeckOverviewScreen -> NavEntry(key) {

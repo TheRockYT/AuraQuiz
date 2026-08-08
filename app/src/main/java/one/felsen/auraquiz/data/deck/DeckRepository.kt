@@ -1,6 +1,7 @@
 package one.felsen.auraquiz.data.deck
 
 import kotlinx.coroutines.flow.Flow
+import one.felsen.auraquiz.viewmodel.ConflictStrategy
 import kotlin.uuid.Uuid
 
 class DeckRepository(
@@ -15,4 +16,7 @@ class DeckRepository(
     fun getAllDecks(): Flow<List<DeckEntity>> = deckDao.getAllDecks()
 
     suspend fun deleteDeck(deck: DeckEntity) = deckDao.deleteDeck(deck)
+    suspend fun insertDeckAllIgnore(decks: List<DeckEntity>): List<Long> = deckDao.insertDeckAllIgnore(decks)
+    suspend fun upsertAllDecks(decks: List<DeckEntity>): List<Long> = deckDao.upsertAllDecks(decks)
+    suspend fun upsertAllDeckIfNewer(decks: List<DeckEntity>) = deckDao.upsertAllDeckIfNewer(decks)
 }

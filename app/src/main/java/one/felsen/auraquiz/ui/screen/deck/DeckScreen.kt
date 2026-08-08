@@ -2,8 +2,6 @@ package one.felsen.auraquiz.ui.screen.deck
 
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -21,6 +19,7 @@ import one.felsen.auraquiz.ui.UiState
 import one.felsen.auraquiz.ui.screen.diolog.ErrorDialog
 import one.felsen.auraquiz.ui.screen.diolog.LoadingDialog
 import one.felsen.auraquiz.ui.screen.settings.SettingsPlane
+import one.felsen.auraquiz.ui.screen.settings.components.ListComponent
 import one.felsen.auraquiz.viewmodel.DeckDetailsViewModel
 import kotlin.uuid.Uuid
 
@@ -101,55 +100,36 @@ fun DeckScreen(
                         }
                     }
                 } else {
-                    LazyColumn(
-                        state = listState,
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        itemsIndexed(
-                            items = cards,
-                            key = { _, card -> card.id }
-                        ) { index, card ->
-                            Card(
-                                modifier = Modifier.fillMaxWidth(),
-                                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                                onClick = {
-                                    onSelectCard(card.id)
-                                }
+                    ListComponent(
+                        items = cards,
+                        indexId = { it.id },
+                        onItemClicked = { card ->
+                            onSelectCard(card.id)
+                        }
+                    ) { index, card ->
+                        Row {
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
-                                Row(
+                                Text(
+                                    text = card.title,
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(16.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                                ) {
+                                        .basicMarquee(),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
 
-                                    // Deck Title and Description
-                                    Column(
-                                        modifier = Modifier.weight(1f),
-                                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        Text(
-                                            text = card.title,
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .basicMarquee(),
-                                            style = MaterialTheme.typography.titleMedium,
-                                            color = MaterialTheme.colorScheme.onSurface
-                                        )
-
-                                        Text(
-                                            text = card.explanation,
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .basicMarquee(),
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            maxLines = 1
-                                        )
-                                    }
-                                }
+                                Text(
+                                    text = card.explanation,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .basicMarquee(),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1
+                                )
                             }
                         }
                     }

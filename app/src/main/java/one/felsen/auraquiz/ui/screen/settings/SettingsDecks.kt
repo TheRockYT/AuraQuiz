@@ -1,7 +1,10 @@
 package one.felsen.auraquiz.ui.screen.settings
 
 import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -9,19 +12,24 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Upload
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.FloatingActionButtonMenu
 import androidx.compose.material3.FloatingActionButtonMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleFloatingActionButton
 import androidx.compose.material3.ToggleFloatingActionButtonDefaults.animateIcon
@@ -37,15 +45,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.felsen.auraquiz.data.deck.DeckRepository
 import one.felsen.auraquiz.ui.UiState
+import one.felsen.auraquiz.ui.screen.diolog.DialogComponent
 import one.felsen.auraquiz.ui.screen.diolog.ErrorDialog
 import one.felsen.auraquiz.ui.screen.diolog.LoadingDialog
 import one.felsen.auraquiz.viewmodel.DecksViewModel
-import one.felsen.auraquiz.ui.screen.settings.components.FilePickerScreen
+import one.felsen.auraquiz.ui.screen.settings.components.ListComponent
 import kotlin.uuid.Uuid
 
 @Composable
@@ -54,8 +64,18 @@ fun SettingsDecks(
     onSelectDeck: (Uuid) -> Unit,
     onSelectImport: (Uri) -> Unit,
     onSelectCreate: () -> Unit,
+    onSelectExport: () -> Unit,
     deckRepository: DeckRepository
 ) {
+
+    val filePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) {
+            onSelectImport(uri)
+        }
+    }
+
     val decksViewModel = viewModel { DecksViewModel(deckRepository) }
     val uiState by decksViewModel.uiState.collectAsStateWithLifecycle()
 
@@ -67,6 +87,7 @@ fun SettingsDecks(
     val items = listOf(
         Icons.Filled.Add to "Create",
         Icons.Filled.Upload to "Import",
+        Icons.Filled.Download to "Export"
     )
 
     var showUploadDialog by remember { mutableStateOf(false) }
@@ -99,6 +120,7 @@ fun SettingsDecks(
                             when (item.second) {
                                 "Create" -> onSelectCreate()
                                 "Import" -> showUploadDialog = true
+                                "Export" -> onSelectExport()
                             }
                         },
                         icon = { Icon(item.first, contentDescription = null) },
@@ -144,78 +166,67 @@ fun SettingsDecks(
                         }
                     }
                 } else {
-                    LazyColumn(
-                        state = listState,
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        itemsIndexed(
-                            items = decks,
-                            key = { _, deck -> deck.id } // Replace deck.id with a unique identifier if available
-                        ) { index, deck ->
-                            Card(
-                                modifier = Modifier.fillMaxWidth(),
-                                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                                onClick = {
-                                    onSelectDeck(deck.id)
-                                }) {
-                                Row(
+                    ListComponent(
+                        items = decks,
+                        indexId = { deck -> deck.id },
+                        onItemClicked = { deck -> onSelectDeck(deck.id) },
+                    ) { index, deck ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(2.dp)
+                            ) {
+                                Text(
+                                    text = "${index + 1}",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Text(
+                                    text = "${index + 1}",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.secondary
+                                )
+                                Text(
+                                    text = "${index + 1}",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.tertiary
+                                )
+                            }
+
+                            // Deck Title and Description
+                            Column(
+                                modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(
+                                    text = deck.name,
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(16.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                                ) {
-                                    Row(
-                                        horizontalArrangement = Arrangement.spacedBy(2.dp)
-                                    ) {
-                                        Text(
-                                            text = "${index + 1}",
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.primary
-                                        )
-                                        Text(
-                                            text = "${index + 1}",
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.secondary
-                                        )
-                                        Text(
-                                            text = "${index + 1}",
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.tertiary
-                                        )
-                                    }
+                                        .basicMarquee(),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
 
-                                    // Deck Title and Description
-                                    Column(
-                                        modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        Text(
-                                            text = deck.name,
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .basicMarquee(),
-                                            style = MaterialTheme.typography.titleMedium,
-                                            color = MaterialTheme.colorScheme.onSurface
-                                        )
-
-                                        Text(
-                                            text = deck.description,
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .basicMarquee(),
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            maxLines = 1
-                                        )
-                                    }
-                                }
+                                Text(
+                                    text = deck.description,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .basicMarquee(),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1
+                                )
                             }
                         }
                     }
+
                 }
             }
         }
@@ -223,16 +234,34 @@ fun SettingsDecks(
 
 
         if (showUploadDialog) {
-            FilePickerScreen(
-                title = "Select a file",
-                description = "Select a deck file to continue",
-                onFileSelected = { url ->
-                    onSelectImport(url)
-                    showUploadDialog = false
-                },
-                onDismiss = {
-                    showUploadDialog = false
-                })
+            DialogComponent(
+                onDismissRequest = { showUploadDialog = false },
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Upload,
+                    contentDescription = "Import",
+                    modifier = Modifier.size(48.dp)
+                )
+
+                Text(
+                    text = "Import",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Center
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = { filePickerLauncher.launch(listOf("application/json").toTypedArray()) },
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Text("Select File")
+                    }
+                }
+            }
         }
     }
 }
