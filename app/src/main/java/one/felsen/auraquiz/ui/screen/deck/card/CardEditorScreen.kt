@@ -1,16 +1,35 @@
 package one.felsen.auraquiz.ui.screen.deck.card
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import one.felsen.auraquiz.data.card.CardData
+import one.felsen.auraquiz.data.card.CardEntity
 import one.felsen.auraquiz.data.card.CardType
 
 @Composable
@@ -18,17 +37,21 @@ fun CardEditorScreen(
     isEditing: Boolean = false, onBack: () -> Unit,
     onSave: (title: String, hint: String, explanation: String, cardData: CardData) -> Unit,
     onDelete: () -> Unit,
+    initialCard: CardEntity? = null,
 ) {
+    val data = initialCard?.data
     var selectedCardType by remember { mutableStateOf(CardType.FLASHCARD) }
 
     val scrollState = rememberScrollState()
 
 
-    var title by remember { mutableStateOf("") }
-    var hint by remember { mutableStateOf("") }
-    var explanation by remember { mutableStateOf("") }
-    var front by remember { mutableStateOf("") }
-    var back by remember { mutableStateOf("") }
+
+    var title by remember { mutableStateOf(initialCard?.title ?: "") }
+    var hint by remember { mutableStateOf(initialCard?.hint ?: "") }
+    var explanation by remember { mutableStateOf(initialCard?.explanation ?: "") }
+
+    var front by remember { mutableStateOf(if(data is CardData.Flashcard) data.front else "") }
+    var back by remember { mutableStateOf(if(data is CardData.Flashcard) data.back else "") }
 
     Scaffold(
         topBar = {

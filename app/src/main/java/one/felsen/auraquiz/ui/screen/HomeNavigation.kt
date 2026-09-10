@@ -12,9 +12,9 @@ import one.felsen.auraquiz.data.deck.DeckRepository
 import one.felsen.auraquiz.settings.SettingsRepository
 import one.felsen.auraquiz.settings.SettingsViewModel
 import one.felsen.auraquiz.ui.screen.deck.DeckExportScreen
-import one.felsen.auraquiz.ui.screen.deck.DecksImportScreen
 import one.felsen.auraquiz.ui.screen.deck.DeckScreen
 import one.felsen.auraquiz.ui.screen.deck.DeckUpsertScreen
+import one.felsen.auraquiz.ui.screen.deck.DecksImportScreen
 import one.felsen.auraquiz.ui.screen.deck.card.CardScreen
 import one.felsen.auraquiz.ui.screen.settings.SettingsDecks
 import one.felsen.auraquiz.ui.screen.settings.SettingsSchedulerScreen
@@ -137,6 +137,7 @@ fun HomeNavigation(
                 is CreateCardScreen -> NavEntry(key) {
                     CardScreen(
                         onBack = { onBack() },
+                        onDelete = { onBack() },
                         cardRepository = cardRepository,
                         deckId = key.deck
                     )
@@ -145,6 +146,7 @@ fun HomeNavigation(
                 is EditCardScreen -> NavEntry(key) {
                     CardScreen(
                         onBack = { onBack() },
+                        onDelete = { onBack() },
                         cardRepository = cardRepository,
                         deckId = key.deck,
                         cardId = key.uuid

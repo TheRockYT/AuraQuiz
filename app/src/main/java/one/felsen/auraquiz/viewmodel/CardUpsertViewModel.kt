@@ -125,4 +125,40 @@ class CardUpsertViewModel(
             }
         }
     }
+
+    fun deleteCard() {
+        viewModelScope.launch {
+            val stateValue = _uiState.value
+            if (stateValue !is UiState.Success) {
+                Log.d("CardUpsertViewModel", "Cannot delete card: not in a success state")
+                _uiState.value = UiState.Error("Cannot delete card: not in a success state")
+                return@launch
+            }
+
+            val data = stateValue.data
+
+            _uiState.value = UiState.Loading
+
+
+            Log.d("CardUpsertViewModel", "Deleting card")
+            try {
+
+                when (data) {
+                    is CardUpsertState.EDITING -> {
+                        val card = data.initialCard
+                        repository.deleteCard(card)
+                        Log.d("CardUpsertViewModel", "Card successfully deleted")
+                        _uiState.value = UiState.Success(CardUpsertState.DELETED(card.id))
+                    }
+
+                    else -> {
+                        Log.d("CardUpsertViewModel", "Deleting card: not in a edit state")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.d("CardUpsertViewModel", "Deleting card with error: ${e.message}")
+                _uiState.value = UiState.Error(e.localizedMessage ?: "Unknown error occurred")
+            }
+        }
+    }
 }

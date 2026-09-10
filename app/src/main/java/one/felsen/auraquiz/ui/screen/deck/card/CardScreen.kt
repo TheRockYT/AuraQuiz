@@ -16,6 +16,7 @@ import kotlin.uuid.Uuid
 @Composable
 fun CardScreen(
     onBack: () -> Unit,
+    onDelete: (uuid: Uuid) -> Unit,
     cardRepository: CardRepository,
     deckId: Uuid,
     cardId: Uuid? = null
@@ -58,6 +59,8 @@ fun CardScreen(
                 }
 
                 is CardUpsertState.EDITING -> {
+
+                    val initialCard = deckUpsertState.initialCard
                     CardEditorScreen(
                         isEditing = true,
                         onBack = onBack,
@@ -65,13 +68,16 @@ fun CardScreen(
                             cardUpsertViewModel.upsertCard(title, hint, explanation, cardData)
                         },
                         onDelete = {
-//                            cardUpsertViewModel.deleteCard()
-                        }
+                            cardUpsertViewModel.deleteCard()
+                        },
+                        initialCard = initialCard
                     )
                 }
 
                 is CardUpsertState.DELETED -> {
-
+                    LaunchedEffect(deckUpsertState.uuid) {
+                        onDelete(deckUpsertState.uuid)
+                    }
                 }
             }
         }
