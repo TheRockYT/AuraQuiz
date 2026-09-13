@@ -7,8 +7,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import one.felsen.auraquiz.data.card.CardRepository
 import one.felsen.auraquiz.ui.UiState
-import one.felsen.auraquiz.ui.screen.diolog.ErrorDialog
-import one.felsen.auraquiz.ui.screen.diolog.LoadingDialog
+import one.felsen.auraquiz.ui.screen.dialog.ErrorDialog
+import one.felsen.auraquiz.ui.screen.dialog.LoadingDialog
 import one.felsen.auraquiz.viewmodel.CardUpsertState
 import one.felsen.auraquiz.viewmodel.CardUpsertViewModel
 import kotlin.uuid.Uuid

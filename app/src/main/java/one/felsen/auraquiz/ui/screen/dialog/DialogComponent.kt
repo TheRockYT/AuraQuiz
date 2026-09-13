@@ -1,4 +1,4 @@
-package one.felsen.auraquiz.ui.screen.diolog
+package one.felsen.auraquiz.ui.screen.dialog
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

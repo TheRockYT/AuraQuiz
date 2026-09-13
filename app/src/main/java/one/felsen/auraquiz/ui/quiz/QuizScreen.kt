@@ -23,8 +23,6 @@ import one.felsen.auraquiz.data.card.CardData
 import one.felsen.auraquiz.data.card.CardRepository
 import one.felsen.auraquiz.settings.SettingsRepository
 import one.felsen.auraquiz.ui.UiState
-import one.felsen.auraquiz.ui.screen.diolog.ErrorDialog
-import one.felsen.auraquiz.ui.screen.diolog.LoadingDialog
 import one.felsen.auraquiz.viewmodel.QuizViewModel
 import one.felsen.fsrskt.fsrs6.FsrsRating
 
