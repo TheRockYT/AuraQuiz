@@ -51,7 +51,7 @@ fun HomeNavigation(
         ), entryProvider = { key ->
             when (key) {
                 is Quiz -> NavEntry(key) {
-                    HomeScreen(onOpenSettings = { navigate(Settings) }, cardRepository = cardRepository, settingsRepository = settingsRepository)
+                    HomeScreen(onOpenDecks = { navigate(SettingsDecks) }, onOpenSettings = { navigate(Settings) }, cardRepository = cardRepository, settingsRepository = settingsRepository)
                 }
 
                 is Settings -> NavEntry(key) {

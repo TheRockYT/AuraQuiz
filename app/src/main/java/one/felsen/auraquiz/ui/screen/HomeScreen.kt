@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DoorFront
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -18,7 +19,7 @@ import one.felsen.auraquiz.settings.SettingsRepository
 import one.felsen.auraquiz.ui.quiz.QuizScreen
 
 @Composable
-fun HomeScreen(onOpenSettings: () -> Unit, cardRepository: CardRepository, settingsRepository: SettingsRepository) {
+fun HomeScreen(onOpenDecks: () -> Unit, onOpenSettings: () -> Unit, cardRepository: CardRepository, settingsRepository: SettingsRepository) {
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -26,6 +27,12 @@ fun HomeScreen(onOpenSettings: () -> Unit, cardRepository: CardRepository, setti
             TopAppBar(
                 title = { Text("AuraQuiz", fontWeight = FontWeight.Bold) },
                 actions = {
+                    IconButton(onClick = onOpenDecks) {
+                        Icon(
+                            imageVector = Icons.Filled.DoorFront,
+                            contentDescription = "Deck"
+                        )
+                    }
                     IconButton(onClick = onOpenSettings) {
                         Icon(
                             imageVector = Icons.Filled.Settings,
