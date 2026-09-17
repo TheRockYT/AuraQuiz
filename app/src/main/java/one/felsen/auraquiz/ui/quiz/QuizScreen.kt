@@ -1,11 +1,19 @@
 package one.felsen.auraquiz.ui.quiz
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -14,7 +22,11 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -101,38 +113,47 @@ fun QuizScreen(
                         }
 
                         Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 8.dp), // Small padding on the edges of the screen
-                            horizontalArrangement = Arrangement.spacedBy(8.dp), // Even gaps between buttons
-                            verticalAlignment = Alignment.CenterVertically
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             RatingButton(
                                 text = "Again",
-                                modifier = Modifier.weight(1f), // Takes up exactly 25% of the space
-                                containerColor = MaterialTheme.colorScheme.errorContainer,
-                                contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                                icon = Icons.Default.Refresh,
+                                brush = Brush.horizontalGradient(
+                                    colors = listOf(Color(0xFF475569), Color(0xFF334155))
+                                ),
+                                contentColor = Color.White,
+                                modifier = Modifier.weight(1f),
                                 onClick = { deckDetailsViewModel.rateCard(FsrsRating.AGAIN) }
                             )
                             RatingButton(
                                 text = "Hard",
+                                icon = Icons.Default.Warning,
+                                brush = Brush.horizontalGradient(
+                                    colors = listOf(Color(0xFFF97316), Color(0xFFEA580C))
+                                ),
+                                contentColor = Color.White,
                                 modifier = Modifier.weight(1f),
-                                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
                                 onClick = { deckDetailsViewModel.rateCard(FsrsRating.HARD) }
                             )
                             RatingButton(
                                 text = "Good",
+                                icon = Icons.Default.ThumbUp,
+                                brush = Brush.horizontalGradient(
+                                    colors = listOf(Color(0xFF3B82F6), Color(0xFF1D4ED8))
+                                ),
+                                contentColor = Color.White,
                                 modifier = Modifier.weight(1f),
-                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                                 onClick = { deckDetailsViewModel.rateCard(FsrsRating.GOOD) }
                             )
                             RatingButton(
                                 text = "Easy",
+                                icon = Icons.Default.Star,
+                                brush = Brush.horizontalGradient(
+                                    colors = listOf(Color(0xFF10B981), Color(0xFF047857))
+                                ),
+                                contentColor = Color.White,
                                 modifier = Modifier.weight(1f),
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                                 onClick = { deckDetailsViewModel.rateCard(FsrsRating.EASY) }
                             )
                         }
@@ -167,25 +188,44 @@ fun QuizScreen(
 @Composable
 fun RatingButton(
     text: String,
-    containerColor: Color,
+    brush: Brush,
     contentColor: Color,
-    modifier: Modifier = Modifier, // Added modifier parameter
+    modifier: Modifier = Modifier,
+    icon: ImageVector? = null,
     onClick: () -> Unit = {}
 ) {
     Button(
         onClick = onClick,
-        modifier = modifier,
-        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(brush),
+        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 12.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = containerColor,
+            containerColor = Color.Transparent,
             contentColor = contentColor
         )
     ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelLarge,
-            maxLines = 1,      // Prevents text from stacking vertically
-            softWrap = false   // Disables wrapping entirely
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = contentColor
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+            }
+            Text(
+                text = text,
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontWeight = FontWeight.Bold
+                ),
+                maxLines = 1,
+                softWrap = false
+            )
+        }
     }
 }
