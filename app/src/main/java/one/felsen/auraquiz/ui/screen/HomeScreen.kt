@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import one.felsen.auraquiz.data.card.CardRepository
 import one.felsen.auraquiz.settings.SettingsRepository
 import one.felsen.auraquiz.ui.quiz.QuizScreen
@@ -23,7 +24,7 @@ fun HomeScreen(onOpenSettings: () -> Unit, cardRepository: CardRepository, setti
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text("AuraQuiz") },
+                title = { Text("AuraQuiz", fontWeight = FontWeight.Bold) },
                 actions = {
                     IconButton(onClick = onOpenSettings) {
                         Icon(
