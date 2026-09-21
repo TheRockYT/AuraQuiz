@@ -14,24 +14,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -39,8 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.util.*
 
 @Composable
 fun DeckEditorScreen(
@@ -56,9 +48,7 @@ fun DeckEditorScreen(
     var name by remember { mutableStateOf(initialName) }
     var description by remember { mutableStateOf(initialDescription) }
     var authors by remember { mutableStateOf(initialAuthors) }
-    var creationDateMillis by remember { mutableLongStateOf(initialCreationDateMillis ?: System.currentTimeMillis()) }
 
-    var showDatePicker by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
 
     val title = if (isEditMode) "Edit Deck" else "Create Deck"
@@ -87,7 +77,7 @@ fun DeckEditorScreen(
                                 name.trim(),
                                 description.trim(),
                                 authors.trim(),
-                                creationDateMillis
+                                initialCreationDateMillis
                             )
                         },
                         enabled = name.isNotBlank()
@@ -110,35 +100,8 @@ fun DeckEditorScreen(
             onDescriptionChange = { description = it },
             authors = authors,
             onAuthorsChange = { authors = it },
-            creationDateMillis = creationDateMillis,
-            onPickDateClick = { showDatePicker = true }
+            creationDateMillis = initialCreationDateMillis
         )
-    }
-
-    if (showDatePicker) {
-        val datePickerState = rememberDatePickerState(
-            initialSelectedDateMillis = creationDateMillis,
-            selectableDates = object : SelectableDates {}
-        )
-
-        DatePickerDialog(
-            onDismissRequest = { showDatePicker = false },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        datePickerState.selectedDateMillis?.let { selected ->
-                            creationDateMillis = selected
-                        }
-                        showDatePicker = false
-                    }
-                ) { Text("OK") }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
-            }
-        ) {
-            DatePicker(state = datePickerState)
-        }
     }
 }
 
@@ -151,8 +114,7 @@ private fun DeckEditorContent(
     onDescriptionChange: (String) -> Unit,
     authors: String,
     onAuthorsChange: (String) -> Unit,
-    creationDateMillis: Long?,
-    onPickDateClick: () -> Unit
+    creationDateMillis: Long?
 ) {
     Column(
         modifier = Modifier
@@ -198,12 +160,7 @@ private fun DeckEditorContent(
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words)
         )
 
-        FilledTonalButton(
-            onClick = onPickDateClick,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Creation Date: ${creationDateMillis.toPrettyDate()}")
-        }
+        Text("Creation Date: ${creationDateMillis.toPrettyDate()}")
     }
 }
 

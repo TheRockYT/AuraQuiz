@@ -66,6 +66,7 @@ fun DeckUpsertScreen(
                         initialName = initialDeck.name,
                         initialDescription = initialDeck.description,
                         initialAuthors = initialDeck.authors,
+                        initialCreationDateMillis = initialDeck.creationTimestamp,
                         onBack = onBack,
                         onSave = { name, description, authors, _ ->
                             deckUpsertViewModel.upsertDeck(name, description, authors)
