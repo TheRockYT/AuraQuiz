@@ -30,7 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import one.felsen.auraquiz.data.card.CardData
 import one.felsen.auraquiz.data.card.CardEntity
-import one.felsen.auraquiz.data.card.CardType
+import one.felsen.auraquiz.ui.screen.settings.components.SettingToggleRow
 
 @Composable
 fun CardEditorScreen(
@@ -40,7 +40,7 @@ fun CardEditorScreen(
     initialCard: CardEntity? = null,
 ) {
     val data = initialCard?.data
-    var selectedCardType by remember { mutableStateOf(CardType.FLASHCARD) }
+//    var selectedCardType by remember { mutableStateOf(CardType.FLASHCARD) }
 
     val scrollState = rememberScrollState()
 
@@ -52,6 +52,7 @@ fun CardEditorScreen(
 
     var front by remember { mutableStateOf(if(data is CardData.Flashcard) data.front else "") }
     var back by remember { mutableStateOf(if(data is CardData.Flashcard) data.back else "") }
+    var random by remember { mutableStateOf(if(data is CardData.Flashcard) data.random else false) }
 
     Scaffold(
         topBar = {
@@ -74,6 +75,7 @@ fun CardEditorScreen(
                         title, hint, explanation, CardData.Flashcard(
                             front = front,
                             back = back,
+                            random = random
                         )
                     )
                 }) {
@@ -127,6 +129,13 @@ fun CardEditorScreen(
                         label = { Text("Back (Answer)") },
                         modifier = Modifier.fillMaxWidth(),
                         minLines = 3
+                    )
+                    SettingToggleRow(
+                        title = "Randomize Front and Back",
+                        description = "Shuffle the front and back of the card when displaying it.",
+                        checked = random,
+                        onCheckedChange = { random = it },
+                        enabled = true
                     )
                 }
 

@@ -14,7 +14,7 @@ import kotlinx.serialization.Serializable
 sealed interface CardData {
     @Serializable
     @SerialName("flashcard_1")
-    data class Flashcard(val front: String, val back: String) : CardData
+    data class Flashcard(val front: String, val back: String, val random: Boolean) : CardData
 
     @Serializable
     @SerialName("sentence_builder_1")
