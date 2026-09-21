@@ -1,10 +1,10 @@
 package one.felsen.auraquiz.ui.quiz
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -12,7 +12,6 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.MaterialTheme
@@ -45,7 +44,7 @@ fun SwipeToDismissContainer(
     enabled: Boolean = true,
     backgroundTapToDismiss: Boolean = false,
     scrimColor: Color = Color.Transparent,
-    dismissThreshold: Dp = 96.dp,
+    dismissThreshold: Dp = 84.dp,
     touchSlop: Dp = 12.dp,
     content: @Composable () -> Unit
 ) {
