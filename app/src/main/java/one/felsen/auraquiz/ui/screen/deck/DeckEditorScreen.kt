@@ -160,7 +160,9 @@ private fun DeckEditorContent(
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words)
         )
 
-        Text("Creation Date: ${creationDateMillis.toPrettyDate()}")
+        if (creationDateMillis != null) {
+            Text("Creation Date: ${creationDateMillis.toPrettyDate()}")
+        }
     }
 }
 
