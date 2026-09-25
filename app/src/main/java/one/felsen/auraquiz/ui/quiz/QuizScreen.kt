@@ -230,6 +230,7 @@ fun RatingButton(
             }
             Text(
                 text = text,
+                color = contentColor,
                 style = MaterialTheme.typography.labelLarge.copy(
                     fontWeight = FontWeight.Bold
                 ),
