@@ -38,6 +38,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -80,7 +82,11 @@ fun QuizScreen(
             ) {
                 when (val state = uiState) {
                     is UiState.Error -> {
-                        Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxSize()) {
+                        Column(
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
                             Text(
                                 text = state.message,
                                 style = MaterialTheme.typography.bodyLarge,
@@ -91,7 +97,11 @@ fun QuizScreen(
                     }
 
                     is UiState.Loading -> {
-                        Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxSize()) {
+                        Column(
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
                             Text(
                                 text = "Please wait...",
                                 style = MaterialTheme.typography.bodyLarge,
@@ -128,6 +138,8 @@ fun QuizScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
+                            val haptic = LocalHapticFeedback.current
+
                             RatingButton(
                                 text = "Again",
                                 icon = Icons.Default.Refresh,
@@ -136,7 +148,10 @@ fun QuizScreen(
                                 ),
                                 contentColor = Color.White,
                                 modifier = Modifier.weight(1f),
-                                onClick = { deckDetailsViewModel.rateCard(FsrsRating.AGAIN) }
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    deckDetailsViewModel.rateCard(FsrsRating.AGAIN)
+                                }
                             )
                             RatingButton(
                                 text = "Hard",
@@ -146,7 +161,10 @@ fun QuizScreen(
                                 ),
                                 contentColor = Color.White,
                                 modifier = Modifier.weight(1f),
-                                onClick = { deckDetailsViewModel.rateCard(FsrsRating.HARD) }
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    deckDetailsViewModel.rateCard(FsrsRating.HARD)
+                                }
                             )
                             RatingButton(
                                 text = "Good",
@@ -156,7 +174,10 @@ fun QuizScreen(
                                 ),
                                 contentColor = Color.White,
                                 modifier = Modifier.weight(1f),
-                                onClick = { deckDetailsViewModel.rateCard(FsrsRating.GOOD) }
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    deckDetailsViewModel.rateCard(FsrsRating.GOOD)
+                                }
                             )
                             RatingButton(
                                 text = "Easy",
@@ -166,7 +187,10 @@ fun QuizScreen(
                                 ),
                                 contentColor = Color.White,
                                 modifier = Modifier.weight(1f),
-                                onClick = { deckDetailsViewModel.rateCard(FsrsRating.EASY) }
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    deckDetailsViewModel.rateCard(FsrsRating.EASY)
+                                }
                             )
                         }
                     }
@@ -217,7 +241,9 @@ fun RatingButton(
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxSize().basicMarquee()
+            modifier = Modifier
+                .fillMaxSize()
+                .basicMarquee()
         ) {
             if (icon != null) {
                 Icon(
