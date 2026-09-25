@@ -68,6 +68,7 @@ dependencies {
     implementation(libs.fsrskt)
 
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.schema.generator.json)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
