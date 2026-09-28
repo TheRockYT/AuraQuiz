@@ -147,7 +147,7 @@ interface CardDao {
         INNER JOIN decks d ON c.deckId = d.id
         LEFT JOIN card_data cd ON c.id = cd.id
         WHERE d.active = 1 AND c.active = 1 AND cd.id IS NULL AND d.id = :deckId
-        ORDER BY c.priority DESC, c.creationTimestamp ASC
+        ORDER BY c.priority DESC, RANDOM()
         LIMIT 1
     """)
     suspend fun getNextNewCard(deckId: Uuid): CardWithData?
