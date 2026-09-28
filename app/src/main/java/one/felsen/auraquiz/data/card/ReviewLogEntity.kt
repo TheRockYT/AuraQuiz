@@ -24,5 +24,10 @@ data class ReviewLogEntity(
     val cardId: Uuid,
     val reviewedAt: Long,
     val rating: Int,
-    val elapsedDays: Double
+
+    val stability: Double,
+    val difficulty: Double,
+//    val state: state
+    val elapsedDays: Double,
+    val scheduledDays: Double
 )

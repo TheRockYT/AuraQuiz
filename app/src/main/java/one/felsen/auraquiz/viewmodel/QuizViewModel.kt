@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import one.felsen.auraquiz.data.card.CardDataEntity
 import one.felsen.auraquiz.data.card.CardRepository
 import one.felsen.auraquiz.data.card.CardWithData
+import one.felsen.auraquiz.data.card.ReviewLogEntity
 import one.felsen.auraquiz.settings.SettingsRepository
 import one.felsen.auraquiz.ui.UiState
 import one.felsen.fsrskt.fsrs6.FsrsCalculator
@@ -78,34 +79,46 @@ class QuizViewModel(private val cardRepository: CardRepository, private val sett
             }
 
             val data = stateValue.data
+            val card = data.card
+            val cardId = card.id
             val cardData = data.cardData
 
             val now = Clock.System.now()
-            val lastReview = Instant.fromEpochMilliseconds(cardData?.lastReview ?: now.toEpochMilliseconds())
+            val nowEpoch = now.toEpochMilliseconds()
+            val lastReview = Instant.fromEpochMilliseconds(cardData?.lastReview ?: nowEpoch)
+            val elapsedDays = lastReview.elapsedDays(now)
 
             val fsrsState = cardData?.let { FsrsState(difficulty = it.difficulty, stability = it.stability) }
 
             val calc = FsrsCalculator()
             val review = calc.review(
-                state = fsrsState, rating = rating, lastReview.elapsedDays(now),
-                lastReview.isSameDay(now)
+                state = fsrsState,
+                rating = rating,
+                elapsedDays = elapsedDays,
+                sameDay = lastReview.isSameDay(now)
             )
 
+            val reviewStability = review.stability
+            val reviewDifficulty = review.difficulty
+
+            val stabilityDays = reviewStability.days
+            val dueDate = now.plus(stabilityDays).toEpochMilliseconds()
+
             val newCardData = cardData?.copy(
-                dueDate = now.plus(review.stability.days).toEpochMilliseconds(),
-                lastReview = now.toEpochMilliseconds(),
-                difficulty = review.difficulty,
-                stability = review.stability,
-                updatedTimestamp = now.toEpochMilliseconds()
+                dueDate = dueDate,
+                lastReview = nowEpoch,
+                difficulty = reviewDifficulty,
+                stability = reviewStability,
+                updatedTimestamp = nowEpoch
             )
                 ?: CardDataEntity(
-                    id = data.card.id,
-                    dueDate = now.plus(review.stability.days).toEpochMilliseconds(),
-                    lastReview = now.toEpochMilliseconds(),
-                    difficulty = review.difficulty,
-                    stability = review.stability,
-                    creationTimestamp = now.toEpochMilliseconds(),
-                    updatedTimestamp = now.toEpochMilliseconds()
+                    id = cardId,
+                    dueDate = dueDate,
+                    lastReview = nowEpoch,
+                    difficulty = reviewDifficulty,
+                    stability = reviewStability,
+                    creationTimestamp = nowEpoch,
+                    updatedTimestamp = nowEpoch
                 )
 
             try {
@@ -114,7 +127,25 @@ class QuizViewModel(private val cardRepository: CardRepository, private val sett
                     cardDataEntity = newCardData
                 )
             } catch (e: Exception) {
-                _uiState.value = UiState.Error(e.localizedMessage ?: "Unknown error occurred")
+                _uiState.value = UiState.Error(e.localizedMessage ?: "Unknown error occurred while updating card data")
+                return@launch
+            }
+
+            try {
+                cardRepository.insertReviewLogIgnore(
+                    ReviewLogEntity(
+                        cardId = cardId,
+                        reviewedAt = nowEpoch,
+                        rating = rating.value,
+                        stability = reviewStability,
+                        difficulty = reviewDifficulty,
+                        elapsedDays = elapsedDays,
+                        scheduledDays = reviewStability
+                    )
+                )
+            } catch (e: Exception) {
+                _uiState.value =
+                    UiState.Error(e.localizedMessage ?: "Unknown error occurred while inserting review log")
                 return@launch
             }
 

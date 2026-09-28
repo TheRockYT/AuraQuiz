@@ -149,4 +149,7 @@ interface CardDao {
 
     @Query("SELECT * FROM decks")
     fun getAllDecks(): List<DeckEntity>
+
+    @Insert
+    suspend fun insertReviewLogIgnore(reviewLog: ReviewLogEntity)
 }

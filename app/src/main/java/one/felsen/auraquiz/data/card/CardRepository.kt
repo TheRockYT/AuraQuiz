@@ -72,4 +72,5 @@ class CardRepository(
 
     suspend fun upsertCardData(cardDataEntity: CardDataEntity) = cardDao.upsertCardData(cardDataEntity)
 
+    suspend fun insertReviewLogIgnore(reviewLog: ReviewLogEntity) = cardDao.insertReviewLogIgnore(reviewLog)
 }
