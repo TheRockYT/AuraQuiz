@@ -1,6 +1,13 @@
 package one.felsen.auraquiz.data.card
 
-import androidx.room3.*
+import androidx.room3.Dao
+import androidx.room3.Delete
+import androidx.room3.Insert
+import androidx.room3.OnConflictStrategy
+import androidx.room3.Query
+import androidx.room3.Transaction
+import androidx.room3.Update
+import androidx.room3.Upsert
 import kotlinx.coroutines.flow.Flow
 import one.felsen.auraquiz.data.deck.DeckEntity
 import kotlin.uuid.Uuid
@@ -127,9 +134,10 @@ interface CardDao {
     suspend fun getNewCardsStudiedCountSince(startOfDayTimestamp: Long): Int
 
     @Query("""
-        SELECT COUNT(*) FROM card_data
-        WHERE creationTimestamp >= :startOfDayTimestamp
-        AND id = :id
+        SELECT COUNT(*) FROM card_data cd
+        INNER JOIN cards c ON cd.id = c.id
+        WHERE cd.creationTimestamp >= :startOfDayTimestamp
+        AND c.deckId = :id
     """)
     suspend fun getNewCardsStudiedCountSinceOnDeck(startOfDayTimestamp: Long, id: Uuid): Int
 
