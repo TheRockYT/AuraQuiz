@@ -15,7 +15,8 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun QuizQuestionCard(
     hint: String,
-    explanation: String
+    explanation: String,
+    isNew: Boolean
 ) {
     val appearance = LocalQuizAppearance.current
     val containerColor = if (appearance.useGlassStyle) {
@@ -40,7 +41,7 @@ fun QuizQuestionCard(
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            QuizMetadataChips(hint, explanation)
+            QuizMetadataChips(hint, explanation, isNew)
         }
     }
 }

@@ -1,7 +1,8 @@
 package one.felsen.auraquiz.ui.quiz
 
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Help
@@ -24,16 +25,20 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun QuizMetadataChips(hint: String? = null, explanation: String? = null) {
+fun QuizMetadataChips(hint: String? = null, explanation: String? = null, isNew: Boolean =false) {
     val appearance = LocalQuizAppearance.current
 
     var showHint by remember { mutableStateOf(false) }
 
-    FlowRow(
+    Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        itemVerticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically
     ) {
+        if (isNew) {
+            CardStatusIndicator(state = CardState.NEW)
+        } else {
+            CardStatusIndicator(state = CardState.LEARNING)
+        }
         if (!hint.isNullOrBlank()) {
             AssistChip(
                 onClick = {},
@@ -43,7 +48,8 @@ fun QuizMetadataChips(hint: String? = null, explanation: String? = null) {
                         text = hint,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.labelLarge
+                        style = MaterialTheme.typography.labelLarge,
+                        modifier = Modifier.basicMarquee()
                     )
                 },
                 colors = AssistChipDefaults.assistChipColors(

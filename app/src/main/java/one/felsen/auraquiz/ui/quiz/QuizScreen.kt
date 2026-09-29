@@ -112,7 +112,7 @@ fun QuizScreen(
 
                     is UiState.Success -> {
                         val cardWithData = state.data
-                        QuizQuestionCard(cardWithData.card.hint, cardWithData.card.explanation)
+                        QuizQuestionCard(cardWithData.card.hint, cardWithData.card.explanation, cardWithData.cardData == null)
 
                         Column(
                             modifier = Modifier
