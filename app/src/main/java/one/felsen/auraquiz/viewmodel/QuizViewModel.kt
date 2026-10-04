@@ -86,7 +86,7 @@ class QuizViewModel(private val cardRepository: CardRepository, private val sett
             val now = Clock.System.now()
             val nowEpoch = now.toEpochMilliseconds()
             val lastReview = Instant.fromEpochMilliseconds(cardData?.lastReview ?: nowEpoch)
-            val elapsedDays = lastReview.elapsedDays(now)
+            val elapsedDays = now.elapsedDays(lastReview)
 
             val fsrsState = cardData?.let { FsrsState(difficulty = it.difficulty, stability = it.stability) }
 
